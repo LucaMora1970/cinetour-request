@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CineTour Open Air — Richiesta Proiezione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --acc:#0d5c8a;--acc2:#0a4a70;--acc-light:rgba(13,92,138,.1);
+  --bg:#f5f7fa;--surf:#fff;--surf2:#f0f4f8;--bdr:#dde3ea;
+  --txt:#111827;--txt2:#6b7280;--red:#dc2626;--grn:#16a34a;
+  --shd:0 2px 12px rgba(0,0,0,.08);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+
+/* ── Header ── */
+header{background:var(--acc);color:#fff;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.hdr-logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;font-family:'Playfair Display',serif;}
+.hdr-logo .sun{font-size:24px;}
+.hdr-sub{font-size:12px;opacity:.75;text-align:right}
+
+/* ── Container ── */
+.container{max-width:820px;margin:0 auto;padding:32px 20px 60px;}
+
+/* ── Step indicator ── */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:32px;}
+.step{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--txt2);}
+.step.active{color:var(--acc);}
+.step.done{color:var(--grn);}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--bdr);background:var(--surf);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.step.active .step-dot{border-color:var(--acc);background:var(--acc);color:#fff;}
+.step.done .step-dot{border-color:var(--grn);background:var(--grn);color:#fff;}
+.step-line{flex:1;height:2px;background:var(--bdr);margin:0 8px;}
+.step-line.done{background:var(--grn);}
+
+/* ── Card ── */
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:28px 28px;box-shadow:var(--shd);margin-bottom:20px;}
+.card-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--acc);margin-bottom:6px;}
+.card-sub{font-size:13px;color:var(--txt2);margin-bottom:22px;line-height:1.6;}
+
+/* ── Calendario ── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-nav-btn{background:none;border:1px solid var(--bdr);border-radius:7px;width:32px;height:32px;cursor:pointer;font-size:16px;color:var(--txt);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.cal-nav-btn:hover{background:var(--acc-light);border-color:var(--acc);}
+.cal-title{font-size:15px;font-weight:600;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-head{text-align:center;font-size:10px;font-weight:600;color:var(--txt2);padding:4px 0;text-transform:uppercase;}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--bdr);background:var(--surf);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;position:relative;gap:2px;padding:4px;}
+.cal-day.empty{border:none;background:none;cursor:default;}
+.cal-day.past{opacity:.35;cursor:default;pointer-events:none;}
+.cal-day.unavailable{background:#fff5f5;border-color:#fca5a5;color:#9ca3af;cursor:not-allowed;}
+.cal-day.full{background:#f3f4f6;border-color:#d1d5db;color:#9ca3af;cursor:not-allowed;}
+.cal-day.available{background:#f0fdf4;border-color:#86efac;}
+.cal-day.available:hover{background:#dcfce7;border-color:var(--grn);transform:scale(1.05);}
+.cal-day.selected{background:var(--acc);border-color:var(--acc2);color:#fff;}
+.cal-day.weekend{font-weight:700;}
+.cal-day-num{font-size:13px;line-height:1;}
+.cal-day-dot{width:5px;height:5px;border-radius:50%;background:var(--grn);opacity:.7;}
+.cal-day.selected .cal-day-dot{background:#fff;}
+.cal-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt2);}
+.cal-legend-dot{width:12px;height:12px;border-radius:3px;border:1px solid;}
+
+/* ── Date selezionate chips ── */
+.sel-dates{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;min-height:36px;}
+.sel-chip{display:inline-flex;align-items:center;gap:5px;background:var(--acc);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;}
+.sel-chip button{background:none;border:none;color:#fff;cursor:pointer;opacity:.8;font-size:14px;line-height:1;padding:0;}
+.sel-chip button:hover{opacity:1;}
+
+/* ── Servizi ── */
+.servizi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(max-width:500px){.servizi-grid{grid-template-columns:1fr;}}
+.servizio-card{border:2px solid var(--bdr);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+.servizio-card:hover{border-color:var(--acc);background:var(--acc-light);}
+.servizio-card.sel{border-color:var(--acc);background:var(--acc-light);}
+.serv-icon{font-size:26px;flex-shrink:0;}
+.serv-info{flex:1;}
+.serv-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+.serv-desc{font-size:11px;color:var(--txt2);line-height:1.4;}
+.serv-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.servizio-card.sel .serv-check{background:var(--acc);border-color:var(--acc);color:#fff;}
+
+/* ── Form ── */
+.form-row{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.form-input{width:100%;padding:11px 14px;border:1px solid var(--bdr);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--txt);background:var(--surf);transition:border-color .15s;outline:none;}
+.form-input:focus{border-color:var(--acc);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr;}}
+textarea.form-input{min-height:90px;resize:vertical;}
+
+/* ── Bottoni nav ── */
+.btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;}
+.btn{padding:11px 24px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--acc);color:#fff;}
+.btn-primary:hover{background:var(--acc2);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sec{background:none;border:1px solid var(--bdr);color:var(--txt);}
+.btn-sec:hover{border-color:var(--acc);color:var(--acc);}
+
+/* ── Success ── */
+.success-box{text-align:center;padding:40px 24px;}
+.success-icon{font-size:56px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:700;color:var(--grn);margin-bottom:10px;}
+.success-sub{font-size:14px;color:var(--txt2);line-height:1.7;max-width:400px;margin:0 auto;}
+
+/* ── Alert ── */
+.alert{border-radius:8px;padding:12px 16px;font-size:13px;margin-bottom:16px;display:none;}
+.alert.err{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.alert.ok{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.alert.show{display:block;}
+
+/* ── Sommario ── */
+.summary-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);font-size:13px;}
+.summary-item:last-child{border-bottom:none;}
+.summary-label{min-width:130px;color:var(--txt2);font-weight:500;flex-shrink:0;}
+.summary-value{color:var(--txt);font-weight:500;flex:1;}
+
+/* ── Footer ── */
+footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-top:1px solid var(--bdr);margin-top:40px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">
+    <span class="sun">☀</span>
+    CineTour Open Air
+  </div>
+  <div class="hdr-sub">Cinema Multisala Teatro Mendrisio<br>Richiesta proiezione</div>
+</header>
+
+<div class="container">
+
+  <!-- Step indicator -->
+  <div class="steps" id="stepIndicator">
+    <div class="step active" id="step-ind-1"><div class="step-dot">1</div><span>Date</span></div>
+    <div class="step-line" id="line-1-2"></div>
+    <div class="step" id="step-ind-2"><div class="step-dot">2</div><span>Servizi</span></div>
+    <div class="step-line" id="line-2-3"></div>
+    <div class="step" id="step-ind-3"><div class="step-dot">3</div><span>Dati</span></div>
+    <div class="step-line" id="line-3-4"></div>
+    <div class="step" id="step-ind-4"><div class="step-dot">4</div><span>Conferma</span></div>
+  </div>
+
+  <div id="alert" class="alert"></div>
+
+  <!-- ══ STEP 1: Calendario ══ -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title">📅 Seleziona le date</div>
+      <div class="card-sub">Scegli una o più date per la tua proiezione. Le date evidenziate in verde sono disponibili. Puoi richiedere più date per la stessa stagione.</div>
+
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+        <span class="cal-title" id="calTitle">Caricamento...</span>
+        <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+      </div>
+
+      <div class="cal-grid" id="calHead"></div>
+      <div class="cal-grid" id="calGrid" style="margin-top:5px"></div>
+
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#f0fdf4;border-color:#86efac"></div>Disponibile</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--acc);border-color:var(--acc)"></div>Selezionata</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#f3f4f6;border-color:#d1d5db"></div>Non disponibile</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Date selezionate</div>
+      <div class="sel-dates" id="selDates">
+        <span style="font-size:13px;color:var(--txt2)">Nessuna data selezionata — clicca sul calendario sopra</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(2)" id="btn1">Avanti — Scegli servizi →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: Servizi ══ -->
+  <div id="step2" style="display:none">
+    <div class="card">
+      <div class="card-title">🎪 Servizi opzionali</div>
+      <div class="card-sub">Seleziona i servizi aggiuntivi che desideri includere nella tua proiezione. Puoi scegliere più opzioni.</div>
+
+      <div class="servizi-grid" id="serviziGrid">
+        <div class="servizio-card" onclick="toggleServizio('sedie')" id="serv-sedie">
+          <span class="serv-icon">🪑</span>
+          <div class="serv-info">
+            <div class="serv-name">Sedie</div>
+            <div class="serv-desc">Fornitura sedie per il pubblico</div>
+          </div>
+          <div class="serv-check">✓</div>
+        </div>
+        <div class="servizio-card" onclick="toggleServizio('bibita')" id="serv-bibita">
+          <span class="serv-icon">🥤</span>
+          <div class="serv-info">
+            <div class="serv-name">Bibite</div>
+            <div class="serv-desc">Servizio bibite per gli spettatori</div>
+          </div>
+          <div class="serv-check">✓</div>
+        </div>
+        <div class="servizio-card" onclick="toggleServizio('popcorn')" id="serv-popcorn">
+          <span class="serv-icon">🍿</span>
+          <div class="serv-info">
+            <div class="serv-name">Popcorn</div>
+            <div class="serv-desc">Servizio popcorn durante la proiezione</div>
+          </div>
+          <div class="serv-check">✓</div>
+        </div>
+        <div class="servizio-card" onclick="toggleServizio('pubblicita')" id="serv-pubblicita">
+          <span class="serv-icon">📢</span>
+          <div class="serv-info">
+            <div class="serv-name">Pubblicità</div>
+            <div class="serv-desc">Promozione locale dell'evento</div>
+          </div>
+          <div class="serv-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-sec" onclick="goStep(1)">← Indietro</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Avanti — Dati organizzatore →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: Dati organizzatore ══ -->
+  <div id="step3" style="display:none">
+    <div class="card">
+      <div class="card-title">🏢 Dati organizzatore</div>
+      <div class="card-sub">Inserisci i tuoi dati di contatto. Riceverai una conferma via email entro 48 ore lavorative.</div>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">Ragione sociale / Ente *</label>
+          <input type="text" id="f-ragione" class="form-input" placeholder="Comune di..., Associazione...">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Nome e cognome referente *</label>
+          <input type="text" id="f-referente" class="form-input" placeholder="Mario Rossi">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">Email *</label>
+          <input type="email" id="f-email" class="form-input" placeholder="email@comune.ch">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Telefono *</label>
+          <input type="tel" id="f-tel" class="form-input" placeholder="+41 91 ...">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Luogo della proiezione *</label>
+        <input type="text" id="f-luogo" class="form-input" placeholder="Es. Piazza Grande Mendrisio, Parco Comunale...">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Comune</label>
+        <input type="text" id="f-comune" class="form-input" placeholder="Es. Mendrisio, Melide, Paradiso...">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Nr. spettatori previsti (indicativo)</label>
+        <input type="number" id="f-spettatori" class="form-input" placeholder="Es. 200">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Note aggiuntive</label>
+        <textarea id="f-note" class="form-input" placeholder="Informazioni aggiuntive, richieste speciali..."></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-sec" onclick="goStep(2)">← Indietro</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Avanti — Riepilogo →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: Riepilogo e invio ══ -->
+  <div id="step4" style="display:none">
+    <div class="card">
+      <div class="card-title">✅ Riepilogo richiesta</div>
+      <div class="card-sub">Verifica i dati prima di inviare. Riceverai una conferma via email.</div>
+      <div id="summaryContent"></div>
+    </div>
+
+    <div class="card" style="background:rgba(13,92,138,.04);border-color:rgba(13,92,138,.2)">
+      <div style="font-size:13px;color:var(--txt2);line-height:1.7">
+        📋 La tua richiesta verrà valutata dal team di <strong>Cinema Multisala Teatro Mendrisio</strong> entro <strong>48 ore lavorative</strong>. Riceverai una risposta all'indirizzo email indicato. La richiesta non è vincolante fino alla conferma scritta firmata.
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-sec" onclick="goStep(3)">← Modifica</button>
+      <button class="btn btn-primary" onclick="inviaRichiesta()" id="btnInvia">📨 Invia richiesta</button>
+    </div>
+  </div>
+
+  <!-- ══ SUCCESS ══ -->
+  <div id="stepSuccess" style="display:none">
+    <div class="card">
+      <div class="success-box">
+        <div class="success-icon">🎬</div>
+        <div class="success-title">Richiesta inviata con successo!</div>
+        <div class="success-sub" id="successMsg">
+          La tua richiesta è stata ricevuta. Ti contatteremo entro 48 ore lavorative all'indirizzo email indicato.
+        </div>
+        <div style="margin-top:24px;font-size:12px;color:var(--txt2)" id="successRef"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  ☀ CineTour Open Air · Cinema Multisala Teatro Mendrisio · Richiesta online
+</footer>
+
+<script type="module">
+// ══════════════════════════════════════════════════════════
+// CONFIGURAZIONE FIREBASE
+// Sostituisci con la tua config da Firebase Console
+// ══════════════════════════════════════════════════════════
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, getDocs, addDoc, query, where, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",
+  authDomain: "cinemanager-4c67c.firebaseapp.com",
+  projectId: "cinemanager-4c67c",
+  storageBucket: "cinemanager-4c67c.firebasestorage.app",
+  messagingSenderId: "730874662111",
+  appId: "1:730874662111:web:8a4a501dd81644bc96ed6a"
+};
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(app);
+
+// ── Stato globale ──────────────────────────────────────────
+const state = {
+  currentStep: 1,
+  calYear: new Date().getFullYear(),
+  calMonth: new Date().getMonth(), // 0-based
+  selectedDates: [],   // ['2026-06-05', ...]
+  servizi: [],         // ['sedie', 'bibita', ...]
+  slots: [],           // {data, bloccata, anno}
+  oaBookings: []       // prenotazioni OA esistenti per data
+};
+
+// Assicura che il mese sia dentro la stagione OA (mag-set)
+function clampMese(){
+  if(state.calMonth < 4) state.calMonth = 4;
+  if(state.calMonth > 8) state.calMonth = 8;
+}
+
+// ── Caricamento dati Firebase ──────────────────────────────
+async function loadData(){
+  try {
+    // Carica slot disponibili per l'anno corrente e successivo
+    const slotsSnap = await getDocs(collection(db, 'oaSlots'));
+    state.slots = slotsSnap.docs.map(d => ({id: d.id, ...d.data()}));
+    // Carica prenotazioni OA per contare quelle esistenti
+    const bookSnap = await getDocs(collection(db, 'bookings'));
+    state.oaBookings = bookSnap.docs
+      .map(d => ({id: d.id, ...d.data()}))
+      .filter(b => b.type === 'openair');
+    renderCal();
+  } catch(e) {
+    showAlert('Errore di connessione: ' + e.message, 'err');
+  }
+}
+
+// ── Conta prenotazioni OA per data ───────────────────────
+function countPrenot(dateStr){
+  return state.oaBookings.filter(b =>
+    (b.dates || []).some(d => d.date === dateStr)
+  ).length;
+}
+
+// ── Calendario ────────────────────────────────────────────
+const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const GIORNI = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+
+function calNav(dir){
+  state.calMonth += dir;
+  if(state.calMonth < 4){ state.calMonth = 4; }
+  if(state.calMonth > 8){ state.calMonth = 8; }
+  renderCal();
+}
+window.calNav = calNav;
+
+function renderCal(){
+  clampMese();
+  document.getElementById('calTitle').textContent = MESI[state.calMonth] + ' ' + state.calYear;
+  // Header giorni settimana
+  const head = document.getElementById('calHead');
+  head.innerHTML = GIORNI.map(g => `<div class="cal-head">${g}</div>`).join('');
+  // Griglia
+  const grid = document.getElementById('calGrid');
+  const oggi = new Date();
+  oggi.setHours(0,0,0,0);
+  const primoGiorno = new Date(state.calYear, state.calMonth, 1);
+  const ultimoGiorno = new Date(state.calYear, state.calMonth + 1, 0);
+  const offset = (primoGiorno.getDay() + 6) % 7; // lun=0
+  let html = '';
+  // Celle vuote iniziali
+  for(let i = 0; i < offset; i++) html += '<div class="cal-day empty"></div>';
+  // Giorni
+  for(let g = 1; g <= ultimoGiorno.getDate(); g++){
+    const data = state.calYear + '-' + String(state.calMonth + 1).padStart(2,'0') + '-' + String(g).padStart(2,'0');
+    const d = new Date(data + 'T12:00:00');
+    const dow = (d.getDay() + 6) % 7;
+    const isWeekend = dow >= 5;
+    const isPast = d < oggi;
+    const slot = state.slots.find(s => s.data === data);
+    const prenCount = countPrenot(data);
+    const isSelected = state.selectedDates.includes(data);
+    // Determina classe
+    let cls = 'cal-day';
+    if(isWeekend) cls += ' weekend';
+    if(isPast){ cls += ' past'; }
+    else if(!slot){ cls += ' unavailable'; } // non ancora generato/fuori stagione
+    else if(prenCount >= 2){ cls += ' full'; }
+    else if(slot.bloccata){ cls += ' unavailable'; }
+    else if(isSelected){ cls += ' selected'; }
+    else { cls += ' available'; }
+    const clickable = !isPast && slot && !slot.bloccata && prenCount < 2;
+    html += `<div class="${cls}" ${clickable ? `onclick="toggleDate('${data}')"` : ''}>
+      <span class="cal-day-num">${g}</span>
+      ${!isPast && slot && !slot.bloccata && prenCount < 2 ? '<span class="cal-day-dot"></span>' : ''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  renderSelDates();
+}
+
+function toggleDate(data){
+  const idx = state.selectedDates.indexOf(data);
+  if(idx >= 0){
+    state.selectedDates.splice(idx, 1);
+  } else {
+    state.selectedDates.push(data);
+    state.selectedDates.sort();
+  }
+  renderCal();
+}
+window.toggleDate = toggleDate;
+
+function renderSelDates(){
+  const w = document.getElementById('selDates');
+  if(!state.selectedDates.length){
+    w.innerHTML = '<span style="font-size:13px;color:var(--txt2)">Nessuna data selezionata — clicca sul calendario sopra</span>';
+    return;
+  }
+  w.innerHTML = state.selectedDates.map(data => {
+    const d = new Date(data + 'T12:00:00');
+    const label = d.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+    return `<span class="sel-chip">${label} <button onclick="toggleDate('${data}')">×</button></span>`;
+  }).join('');
+}
+
+// ── Servizi ───────────────────────────────────────────────
+function toggleServizio(id){
+  const idx = state.servizi.indexOf(id);
+  if(idx >= 0) state.servizi.splice(idx, 1);
+  else state.servizi.push(id);
+  // Aggiorna UI
+  ['sedie','bibita','popcorn','pubblicita'].forEach(s => {
+    document.getElementById('serv-' + s).classList.toggle('sel', state.servizi.includes(s));
+  });
+}
+window.toggleServizio = toggleServizio;
+
+// ── Step navigation ───────────────────────────────────────
+function showAlert(msg, type){
+  const a = document.getElementById('alert');
+  a.textContent = msg;
+  a.className = 'alert ' + type + ' show';
+  setTimeout(() => a.classList.remove('show'), 4000);
+}
+
+function goStep(n){
+  // Validazione
+  if(n > 1 && state.selectedDates.length === 0){
+    showAlert('Seleziona almeno una data prima di continuare.', 'err');
+    return;
+  }
+  if(n > 3){
+    const f = ['f-ragione','f-referente','f-email','f-tel','f-luogo'];
+    for(const id of f){
+      if(!document.getElementById(id).value.trim()){
+        showAlert('Compila tutti i campi obbligatori (*).', 'err');
+        document.getElementById(id).focus();
+        return;
+      }
+    }
+    const email = document.getElementById('f-email').value;
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      showAlert('Inserisci un indirizzo email valido.', 'err');
+      return;
+    }
+    buildSummary();
+  }
+  state.currentStep = n;
+  ['step1','step2','step3','step4','stepSuccess'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('step' + n).style.display = 'block';
+  updateStepIndicator(n);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+window.goStep = goStep;
+
+function updateStepIndicator(n){
+  for(let i = 1; i <= 4; i++){
+    const el = document.getElementById('step-ind-' + i);
+    el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+    el.querySelector('.step-dot').textContent = i < n ? '✓' : i;
+  }
+  for(let i = 1; i <= 3; i++){
+    const line = document.getElementById('line-' + i + '-' + (i+1));
+    if(line) line.className = 'step-line' + (i < n ? ' done' : '');
+  }
+}
+
+function buildSummary(){
+  const SERV_LABEL = {sedie:'Sedie',bibita:'Bibite',popcorn:'Popcorn',pubblicita:'Pubblicità'};
+  const dates = state.selectedDates.map(d => {
+    const dt = new Date(d + 'T12:00:00');
+    return dt.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  }).join('\n');
+  const items = [
+    ['Ragione sociale', document.getElementById('f-ragione').value],
+    ['Referente', document.getElementById('f-referente').value],
+    ['Email', document.getElementById('f-email').value],
+    ['Telefono', document.getElementById('f-tel').value],
+    ['Luogo proiezione', document.getElementById('f-luogo').value],
+    ['Comune', document.getElementById('f-comune').value || '—'],
+    ['Spettatori previsti', document.getElementById('f-spettatori').value || '—'],
+    ['Date richieste', state.selectedDates.length + ' data' + (state.selectedDates.length > 1 ? 'e' : '')],
+    ['Servizi richiesti', state.servizi.length ? state.servizi.map(s => SERV_LABEL[s]).join(', ') : 'Nessuno'],
+    ['Note', document.getElementById('f-note').value || '—'],
+  ];
+  document.getElementById('summaryContent').innerHTML =
+    items.map(([l, v]) => `<div class="summary-item"><span class="summary-label">${l}</span><span class="summary-value">${v}</span></div>`).join('') +
+    '<div style="margin-top:12px;padding:10px;background:var(--surf2);border-radius:6px;font-size:12px;color:var(--txt2)">' +
+    state.selectedDates.map(d => {
+      const dt = new Date(d + 'T12:00:00');
+      return '📅 ' + dt.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
+    }).join(' · ') + '</div>';
+}
+
+// ── Invio richiesta su Firestore ─────────────────────────
+async function inviaRichiesta(){
+  const btn = document.getElementById('btnInvia');
+  btn.disabled = true;
+  btn.textContent = '⏳ Invio in corso...';
+  try {
+    const richiesta = {
+      // Dati organizzatore
+      ragione: document.getElementById('f-ragione').value.trim(),
+      referente: document.getElementById('f-referente').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      tel: document.getElementById('f-tel').value.trim(),
+      luogo: document.getElementById('f-luogo').value.trim(),
+      comune: document.getElementById('f-comune').value.trim(),
+      spettatori: parseInt(document.getElementById('f-spettatori').value) || 0,
+      note: document.getElementById('f-note').value.trim(),
+      // Date e servizi
+      date: state.selectedDates,
+      servizi: state.servizi,
+      // Metadati
+      stato: 'nuova',         // nuova | accettata | rifiutata | in_attesa
+      createdAt: serverTimestamp(),
+      source: 'web'
+    };
+    const docRef = await addDoc(collection(db, 'oaRichieste'), richiesta);
+    // Mostra successo
+    document.getElementById('step4').style.display = 'none';
+    document.getElementById('stepIndicator').style.display = 'none';
+    document.getElementById('stepSuccess').style.display = 'block';
+    document.getElementById('successMsg').textContent =
+      `La tua richiesta per ${state.selectedDates.length} data${state.selectedDates.length > 1 ? 'e' : ''} è stata ricevuta. Ti contatteremo entro 48 ore lavorative all'indirizzo ${richiesta.email}.`;
+    document.getElementById('successRef').textContent = 'Riferimento richiesta: ' + docRef.id.substring(0, 8).toUpperCase();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } catch(e) {
+    showAlert('Errore durante l\'invio: ' + e.message, 'err');
+    btn.disabled = false;
+    btn.textContent = '📨 Invia richiesta';
+  }
+}
+window.inviaRichiesta = inviaRichiesta;
+
+// ── Init ─────────────────────────────────────────────────
+// Inizia dalla stagione corrente
+const ora = new Date();
+state.calYear = ora.getFullYear();
+state.calMonth = Math.min(Math.max(ora.getMonth(), 4), 8);
+
+loadData();
+</script>
+</body>
+</html>
