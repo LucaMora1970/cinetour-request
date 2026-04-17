@@ -189,37 +189,8 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       <div class="card-sub">Seleziona i servizi aggiuntivi che desideri includere nella tua proiezione. Puoi scegliere più opzioni.</div>
 
       <div class="servizi-grid" id="serviziGrid">
-        <div class="servizio-card" onclick="toggleServizio('sedie')" id="serv-sedie">
-          <span class="serv-icon">🪑</span>
-          <div class="serv-info">
-            <div class="serv-name">Sedie</div>
-            <div class="serv-desc">Fornitura sedie per il pubblico</div>
-          </div>
-          <div class="serv-check">✓</div>
-        </div>
-        <div class="servizio-card" onclick="toggleServizio('bibita')" id="serv-bibita">
-          <span class="serv-icon">🥤</span>
-          <div class="serv-info">
-            <div class="serv-name">Bibite</div>
-            <div class="serv-desc">Servizio bibite per gli spettatori</div>
-          </div>
-          <div class="serv-check">✓</div>
-        </div>
-        <div class="servizio-card" onclick="toggleServizio('popcorn')" id="serv-popcorn">
-          <span class="serv-icon">🍿</span>
-          <div class="serv-info">
-            <div class="serv-name">Popcorn</div>
-            <div class="serv-desc">Servizio popcorn durante la proiezione</div>
-          </div>
-          <div class="serv-check">✓</div>
-        </div>
-        <div class="servizio-card" onclick="toggleServizio('pubblicita')" id="serv-pubblicita">
-          <span class="serv-icon">📢</span>
-          <div class="serv-info">
-            <div class="serv-name">Pubblicità</div>
-            <div class="serv-desc">Promozione locale dell'evento</div>
-          </div>
-          <div class="serv-check">✓</div>
+        <div style="color:var(--txt2);font-size:13px;padding:20px;text-align:center;grid-column:1/-1">
+          Caricamento servizi...
         </div>
       </div>
     </div>
@@ -348,6 +319,7 @@ const state = {
   calMonth: new Date().getMonth(), // 0-based
   selectedDates: [],   // ['2026-06-05', ...]
   servizi: [],         // ['sedie', 'bibita', ...]
+  serviziDisponibili: [], // da Firestore oaServizi
   slots: [],           // {data, bloccata, anno}
   oaBookings: []       // prenotazioni OA esistenti per data
 };
@@ -361,15 +333,21 @@ function clampMese(){
 // ── Caricamento dati Firebase ──────────────────────────────
 async function loadData(){
   try {
-    // Carica slot disponibili per l'anno corrente e successivo
-    const slotsSnap = await getDocs(collection(db, 'oaSlots'));
+    const [slotsSnap, bookSnap, serviziSnap] = await Promise.all([
+      getDocs(collection(db, 'oaSlots')),
+      getDocs(collection(db, 'bookings')),
+      getDocs(collection(db, 'oaServizi'))
+    ]);
     state.slots = slotsSnap.docs.map(d => ({id: d.id, ...d.data()}));
-    // Carica prenotazioni OA per contare quelle esistenti
-    const bookSnap = await getDocs(collection(db, 'bookings'));
     state.oaBookings = bookSnap.docs
       .map(d => ({id: d.id, ...d.data()}))
       .filter(b => b.type === 'openair');
+    state.serviziDisponibili = serviziSnap.docs
+      .map(d => ({id: d.id, ...d.data()}))
+      .filter(s => s.attivo !== false)
+      .sort((a,b) => (a.ordine||0)-(b.ordine||0));
     renderCal();
+    renderServiziGrid();
   } catch(e) {
     showAlert('Errore di connessione: ' + e.message, 'err');
   }
@@ -464,15 +442,33 @@ function renderSelDates(){
   }).join('');
 }
 
-// ── Servizi ───────────────────────────────────────────────
+// ── Servizi (dinamici da Firestore) ──────────────────────
+function renderServiziGrid(){
+  const grid = document.getElementById('serviziGrid');
+  if(!grid) return;
+  const attivi = state.serviziDisponibili.filter(s => s.attivo !== false);
+  if(!attivi.length){
+    grid.innerHTML = '<div style="color:var(--txt2);font-size:13px;padding:20px;text-align:center;grid-column:1/-1">Nessun servizio disponibile al momento.</div>';
+    return;
+  }
+  grid.innerHTML = attivi.map(s => {
+    const sel = state.servizi.includes(s.id);
+    return `<div class="servizio-card${sel?' sel':''}" onclick="toggleServizio('${s.id}')" id="serv-${s.id}">
+      <span class="serv-icon">${s.icona||'🎬'}</span>
+      <div class="serv-info">
+        <div class="serv-name">${s.nome}</div>
+        <div class="serv-desc">${s.descrizione||''}</div>
+      </div>
+      <div class="serv-check">✓</div>
+    </div>`;
+  }).join('');
+}
+
 function toggleServizio(id){
   const idx = state.servizi.indexOf(id);
   if(idx >= 0) state.servizi.splice(idx, 1);
   else state.servizi.push(id);
-  // Aggiorna UI
-  ['sedie','bibita','popcorn','pubblicita'].forEach(s => {
-    document.getElementById('serv-' + s).classList.toggle('sel', state.servizi.includes(s));
-  });
+  renderServiziGrid();
 }
 window.toggleServizio = toggleServizio;
 
@@ -529,7 +525,10 @@ function updateStepIndicator(n){
 }
 
 function buildSummary(){
-  const SERV_LABEL = {sedie:'Sedie',bibita:'Bibite',popcorn:'Popcorn',pubblicita:'Pubblicità'};
+  const SERV_LABEL = {};
+  state.serviziDisponibili.forEach(s => { SERV_LABEL[s.id] = s.icona+' '+s.nome; });
+  // fallback per servizi salvati prima della migrazione
+  Object.assign(SERV_LABEL, {sedie:'🪑 Sedie',bibita:'🥤 Bibite',popcorn:'🍿 Popcorn',pubblicita:'📢 Pubblicità'});
   const dates = state.selectedDates.map(d => {
     const dt = new Date(d + 'T12:00:00');
     return dt.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
