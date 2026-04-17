@@ -452,12 +452,25 @@ function renderServiziGrid(){
     return;
   }
   grid.innerHTML = attivi.map(s => {
-    const sel = state.servizi.includes(s.id);
+    const sel = state.servizi.some(x => x.id === s.id);
+    const qta = sel && s.conQuantita ? (state.servizi.find(x=>x.id===s.id)?.qta||'') : '';
     return `<div class="servizio-card${sel?' sel':''}" onclick="toggleServizio('${s.id}')" id="serv-${s.id}">
       <span class="serv-icon">${s.icona||'🎬'}</span>
       <div class="serv-info">
         <div class="serv-name">${s.nome}</div>
         <div class="serv-desc">${s.descrizione||''}</div>
+        ${sel && s.conQuantita ? `
+        <div onclick="event.stopPropagation()" style="margin-top:8px">
+          <label style="font-size:11px;font-weight:600;color:var(--txt2);display:block;margin-bottom:4px">${s.labelQuantita||'Quantità'}</label>
+          <input type="number"
+            id="qta-${s.id}"
+            value="${qta}"
+            min="${s.qtaMin||0}"
+            ${s.qtaMax?`max="${s.qtaMax}"` : ''}
+            placeholder="0"
+            oninput="setServizioQta('${s.id}',this.value)"
+            style="width:100%;padding:7px 10px;border:1px solid var(--bdr);border-radius:7px;font-size:14px;font-family:inherit;color:var(--txt);background:var(--surf)">
+        </div>` : ''}
       </div>
       <div class="serv-check">✓</div>
     </div>`;
@@ -465,12 +478,29 @@ function renderServiziGrid(){
 }
 
 function toggleServizio(id){
-  const idx = state.servizi.indexOf(id);
-  if(idx >= 0) state.servizi.splice(idx, 1);
-  else state.servizi.push(id);
+  const s = state.serviziDisponibili.find(x => x.id === id);
+  const idx = state.servizi.findIndex(x => x.id === id);
+  if(idx >= 0){
+    state.servizi.splice(idx, 1);
+  } else {
+    state.servizi.push({id, qta: s?.conQuantita ? 0 : null});
+  }
   renderServiziGrid();
+  // Focus sull'input quantità se appena selezionato e richiede quantità
+  if(s?.conQuantita && state.servizi.some(x=>x.id===id)){
+    setTimeout(()=>{
+      const inp = document.getElementById('qta-'+id);
+      if(inp){inp.focus();inp.select();}
+    },50);
+  }
 }
 window.toggleServizio = toggleServizio;
+
+function setServizioQta(id, val){
+  const item = state.servizi.find(x => x.id === id);
+  if(item) item.qta = parseInt(val)||0;
+}
+window.setServizioQta = setServizioQta;
 
 // ── Step navigation ───────────────────────────────────────
 function showAlert(msg, type){
@@ -529,6 +559,11 @@ function buildSummary(){
   state.serviziDisponibili.forEach(s => { SERV_LABEL[s.id] = s.icona+' '+s.nome; });
   // fallback per servizi salvati prima della migrazione
   Object.assign(SERV_LABEL, {sedie:'🪑 Sedie',bibita:'🥤 Bibite',popcorn:'🍿 Popcorn',pubblicita:'📢 Pubblicità'});
+  const serviziRiepilogo = state.servizi.map(s => {
+    const label = SERV_LABEL[s.id] || s.id;
+    const def = state.serviziDisponibili.find(x=>x.id===s.id);
+    return label + (def?.conQuantita && s.qta ? ' ('+s.qta+')' : '');
+  });
   const dates = state.selectedDates.map(d => {
     const dt = new Date(d + 'T12:00:00');
     return dt.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
@@ -542,7 +577,7 @@ function buildSummary(){
     ['Comune', document.getElementById('f-comune').value || '—'],
     ['Spettatori previsti', document.getElementById('f-spettatori').value || '—'],
     ['Date richieste', state.selectedDates.length + ' data' + (state.selectedDates.length > 1 ? 'e' : '')],
-    ['Servizi richiesti', state.servizi.length ? state.servizi.map(s => SERV_LABEL[s]).join(', ') : 'Nessuno'],
+    ['Servizi richiesti', state.servizi.length ? serviziRiepilogo.join(', ') : 'Nessuno'],
     ['Note', document.getElementById('f-note').value || '—'],
   ];
   document.getElementById('summaryContent').innerHTML =
@@ -570,9 +605,12 @@ async function inviaRichiesta(){
       comune: document.getElementById('f-comune').value.trim(),
       spettatori: parseInt(document.getElementById('f-spettatori').value) || 0,
       note: document.getElementById('f-note').value.trim(),
-      // Date e servizi
+      // Date e servizi (con quantità dove previsto)
       date: state.selectedDates,
-      servizi: state.servizi,
+      servizi: state.servizi.map(s => ({
+        id: s.id,
+        qta: s.qta || null
+      })),
       // Metadati
       stato: 'nuova',         // nuova | accettata | rifiutata | in_attesa
       createdAt: serverTimestamp(),
