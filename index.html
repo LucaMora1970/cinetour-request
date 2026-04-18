@@ -199,13 +199,25 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       <div class="sel-dates" id="selDates">
         <span style="font-size:13px;color:var(--txt2)">Nessuna data selezionata — clicca sul calendario sopra</span>
       </div>
+
+      <!-- Campo località — subito dopo la selezione delle date -->
+      <div id="localitaWrap" style="display:none;margin-top:16px;border-top:1px solid var(--bdr);padding-top:14px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--txt2);margin-bottom:8px">📍 Località della proiezione</div>
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Inserisci il luogo per calcolare l'orario esatto del tramonto sulla tua posizione.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="s1-luogo" placeholder="Es. Piazza Grande, Lido, Parco Comunale…"
+            oninput="onS1LuogoChange()"
+            style="flex:2;min-width:180px;font-size:14px;padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;background:var(--surf);color:var(--txt);font-family:inherit">
+          <input type="text" id="s1-comune" placeholder="Comune"
+            oninput="onS1LuogoChange()"
+            style="flex:1;min-width:120px;font-size:14px;padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;background:var(--surf);color:var(--txt);font-family:inherit">
+        </div>
+      </div>
+
       <!-- Info tramonto per le date selezionate -->
       <div id="sunsetInfo" style="display:none;margin-top:14px;border-top:1px solid var(--bdr);padding-top:12px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--txt2);margin-bottom:8px">🌅 Tramonto e orario inizio consigliato</div>
         <div id="sunsetList" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
-        <div style="font-size:11px;color:var(--acc);margin-top:10px;padding:6px 10px;background:rgba(13,92,138,.05);border-radius:6px;border:1px solid rgba(13,92,138,.15)">
-          💡 Inserisci il <strong>luogo e comune</strong> nel passaggio "Dati organizzatore" per ottenere l'orario calcolato esattamente sulla posizione della proiezione.
-        </div>
       </div>
     </div>
 
@@ -298,7 +310,18 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
             <input type="checkbox" id="chk-spazio" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
-            <span>✓ È disponibile una <strong>presa 220V – 16A (CEE 5 poli)</strong> accessibile nell'area di proiezione</span>
+            <span>✓ Ho preso visione dei requisiti relativi alla <strong>presa 220V – 16A (CEE 5 poli)</strong>:
+              <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+                <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13px;font-weight:400">
+                  <input type="radio" name="presa" id="presa-si" value="si" style="margin-top:2px;accent-color:#0d5c8a;flex-shrink:0">
+                  <span>✅ <strong>La presa è disponibile</strong> nell'area di proiezione</span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13px;font-weight:400">
+                  <input type="radio" name="presa" id="presa-no" value="no" style="margin-top:2px;accent-color:#0d5c8a;flex-shrink:0">
+                  <span>🔋 <strong>La presa non è disponibile</strong> — richiedo il battery pack del Cinema (da includere nel preventivo)</span>
+                </label>
+              </div>
+            </span>
           </label>
 
         </div>
@@ -505,9 +528,11 @@ window.toggleDate = toggleDate;
 
 function renderSelDates(){
   const w = document.getElementById('selDates');
+  const localitaWrap = document.getElementById('localitaWrap');
   if(!state.selectedDates.length){
     w.innerHTML = '<span style="font-size:13px;color:var(--txt2)">Nessuna data selezionata — clicca sul calendario sopra</span>';
     document.getElementById('sunsetInfo').style.display = 'none';
+    if(localitaWrap) localitaWrap.style.display = 'none';
     return;
   }
   w.innerHTML = state.selectedDates.map(data => {
@@ -515,8 +540,18 @@ function renderSelDates(){
     const label = d.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
     return `<span class="sel-chip">${label} <button onclick="toggleDate('${data}')">×</button></span>`;
   }).join('');
-  // Aggiorna info tramonto
-  fetchSunsets();
+  // Mostra campo località
+  if(localitaWrap) localitaWrap.style.display = 'block';
+  // Calcola tramonto se già inserita località, altrimenti invito
+  const luogo = document.getElementById('s1-luogo')?.value.trim();
+  const comune = document.getElementById('s1-comune')?.value.trim();
+  if(luogo || comune){
+    fetchSunsets();
+  } else {
+    document.getElementById('sunsetInfo').style.display = 'block';
+    document.getElementById('sunsetList').innerHTML =
+      '<div style="font-size:12px;color:var(--txt2);font-style:italic">Inserisci luogo e comune sopra per comunicarti l\'orario possibile di inizio della proiezione.</div>';
+  }
 }
 
 // Cache tramonto: chiave = "data|lat|lon"
@@ -524,11 +559,31 @@ const _sunsetCache = {};
 // Cache geocodifica luogo
 let _luogoGeoCache = null;
 
-// Geocodifica il luogo di proiezione (f-luogo + f-comune)
+// Legge la località dai campi s1 (step1) con fallback su f-luogo/f-comune (step3)
+function getLuogoQuery(){
+  const s1l = document.getElementById('s1-luogo')?.value.trim();
+  const s1c = document.getElementById('s1-comune')?.value.trim();
+  if(s1l || s1c) return [s1l, s1c].filter(Boolean).join(', ');
+  const fl = document.getElementById('f-luogo')?.value.trim();
+  const fc = document.getElementById('f-comune')?.value.trim();
+  return [fl, fc].filter(Boolean).join(', ');
+}
+
+// Handler per i campi s1 nello step1
+function onS1LuogoChange(){
+  _luogoGeoCache = null;
+  // Sincronizza i valori anche nei campi step3 per non doverli reinserire
+  const luogo = document.getElementById('s1-luogo')?.value;
+  const comune = document.getElementById('s1-comune')?.value;
+  if(document.getElementById('f-luogo') && !document.getElementById('f-luogo').value) document.getElementById('f-luogo').value = luogo||'';
+  if(document.getElementById('f-comune') && !document.getElementById('f-comune').value) document.getElementById('f-comune').value = comune||'';
+  if(state.selectedDates.length) fetchSunsets();
+}
+window.onS1LuogoChange = onS1LuogoChange;
+
+// Geocodifica il luogo di proiezione
 async function geocodificaLuogoProiezione(){
-  const luogo = document.getElementById('f-luogo')?.value.trim();
-  const comune = document.getElementById('f-comune')?.value.trim();
-  const query = [luogo, comune].filter(Boolean).join(', ');
+  const query = getLuogoQuery();
   if(!query) return null;
   // Usa cache se il luogo non è cambiato
   if(_luogoGeoCache && _luogoGeoCache.query === query) return _luogoGeoCache;
@@ -592,8 +647,8 @@ async function fetchSunsets(){
           [h, m] = sunset.split(':').map(Number);
         }
 
-        // Inizio proiezione: tramonto + 25 minuti (buio sufficiente), arrotondato ai 5 min
-        const MARGINE_MIN = 25;
+        // Inizio proiezione: tramonto + 5 minuti, arrotondato ai 5 min
+        const MARGINE_MIN = 5;
         const totMin = h * 60 + m + MARGINE_MIN;
         const inizioH = Math.floor(totMin / 60) % 24;
         const inizioMRaw = totMin % 60;
@@ -637,14 +692,19 @@ async function fetchSunsets(){
       </div>`;
     }).join('') +
     `<div style="font-size:11px;color:var(--txt2);margin-top:8px;padding:6px 10px;background:var(--surf2);border-radius:6px">
-      L'orario di inizio suggerito garantisce 25 minuti dopo il tramonto astronomico per buio sufficiente alla proiezione.
+      L'orario di inizio suggerito è 5 minuti dopo il tramonto astronomico.
     </div>`;
 }
 window.fetchSunsets = fetchSunsets;
 
-// Ricalcola il tramonto quando l'utente aggiorna luogo o comune
+// Ricalcola il tramonto quando l'utente aggiorna luogo o comune nello step3
 function onLuogoChange(){
-  _luogoGeoCache = null; // invalida cache geocodifica
+  _luogoGeoCache = null;
+  // Sincronizza anche i campi s1 se vuoti
+  const fl = document.getElementById('f-luogo')?.value;
+  const fc = document.getElementById('f-comune')?.value;
+  if(document.getElementById('s1-luogo') && !document.getElementById('s1-luogo').value) document.getElementById('s1-luogo').value = fl||'';
+  if(document.getElementById('s1-comune') && !document.getElementById('s1-comune').value) document.getElementById('s1-comune').value = fc||'';
   if(state.selectedDates.length) fetchSunsets();
 }
 window.onLuogoChange = onLuogoChange;
@@ -738,7 +798,7 @@ function goStep(n){
       return;
     }
     // Verifica dichiarazioni obbligatorie
-    const chks = ['chk-carrabile','chk-altezza','chk-luci','chk-spazio'];
+    const chks = ['chk-carrabile','chk-altezza','chk-luci'];
     for(const id of chks){
       if(!document.getElementById(id)?.checked){
         showAlert('Devi confermare tutti i requisiti tecnici obbligatori prima di procedere.', 'err');
@@ -746,9 +806,23 @@ function goStep(n){
         return;
       }
     }
+    // Verifica selezione presa elettrica
+    const presaSel = document.querySelector('input[name="presa"]:checked');
+    if(!presaSel){
+      showAlert('Indica se la presa 220V è disponibile oppure se hai bisogno del battery pack.', 'err');
+      document.getElementById('presa-si').scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
     buildSummary();
   }
   state.currentStep = n;
+  // Se si avanza allo step 3, pre-compila luogo e comune dai campi s1
+  if(n === 3){
+    const s1l = document.getElementById('s1-luogo')?.value.trim();
+    const s1c = document.getElementById('s1-comune')?.value.trim();
+    if(s1l && !document.getElementById('f-luogo')?.value) document.getElementById('f-luogo').value = s1l;
+    if(s1c && !document.getElementById('f-comune')?.value) document.getElementById('f-comune').value = s1c;
+  }
   ['step1','step2','step3','step4','stepSuccess'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
@@ -805,7 +879,11 @@ function buildSummary(){
       const label = dt.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
       return '📅 ' + label + (cached ? ` — 🌅 ${cached.tramonto} → ▶ ${cached.inizio}` : '');
     }).join('<br>') + '</div>' +
-    '<div style="margin-top:8px;padding:8px 10px;background:#fff8ed;border:1px solid #f59e0b;border-radius:6px;font-size:11px;color:#78350f">✓ Requisiti tecnici confermati: accesso carrabile (2,60×2,80 m), area proiezione libera e alta 6 m, spazio manovra furgoni/rimorchio, luci spegnibili, presa CEE 16A disponibile</div>';
+    '<div style="margin-top:8px;padding:8px 10px;background:#fff8ed;border:1px solid #f59e0b;border-radius:6px;font-size:11px;color:#78350f">✓ Requisiti tecnici confermati: accesso carrabile (2,60×2,80 m), area proiezione libera e alta 6 m, spazio manovra furgoni/rimorchio, luci spegnibili'
+    + (document.querySelector('input[name="presa"]:checked')?.value==='no'
+        ? ' · <strong>🔋 Battery pack richiesto</strong> (presa non disponibile)'
+        : ' · presa 220V CEE 16A disponibile')
+    + '</div>';
 }
 
 // ── Invio richiesta su Firestore ─────────────────────────
@@ -820,8 +898,8 @@ async function inviaRichiesta(){
       referente: document.getElementById('f-referente').value.trim(),
       email: document.getElementById('f-email').value.trim(),
       tel: document.getElementById('f-tel').value.trim(),
-      luogo: document.getElementById('f-luogo').value.trim(),
-      comune: document.getElementById('f-comune').value.trim(),
+      luogo: document.getElementById('f-luogo').value.trim() || document.getElementById('s1-luogo')?.value.trim() || '',
+      comune: document.getElementById('f-comune').value.trim() || document.getElementById('s1-comune')?.value.trim() || '',
       spettatori: parseInt(document.getElementById('f-spettatori').value) || 0,
       note: document.getElementById('f-note').value.trim(),
       // Date e servizi (con quantità dove previsto)
@@ -838,7 +916,8 @@ async function inviaRichiesta(){
         carrabile: document.getElementById('chk-carrabile')?.checked||false,
         altezza: document.getElementById('chk-altezza')?.checked||false,
         luci: document.getElementById('chk-luci')?.checked||false,
-        spazio: document.getElementById('chk-spazio')?.checked||false,
+        presa: document.querySelector('input[name="presa"]:checked')?.value||'',
+        batteryPackRichiesto: document.querySelector('input[name="presa"]:checked')?.value==='no',
       }
     };
     const docRef = await addDoc(collection(db, 'oaRichieste'), richiesta);
