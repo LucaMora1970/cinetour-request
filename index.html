@@ -200,9 +200,11 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       </div>
       <!-- Info tramonto per le date selezionate -->
       <div id="sunsetInfo" style="display:none;margin-top:14px;border-top:1px solid var(--bdr);padding-top:12px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--txt2);margin-bottom:8px">🌅 Orario tramonto e inizio consigliato</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--txt2);margin-bottom:8px">🌅 Tramonto e orario inizio consigliato</div>
         <div id="sunsetList" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
-        <div style="font-size:11px;color:var(--txt2);margin-top:8px">L'orario di inizio consigliato è 20-25 minuti dopo il tramonto per garantire buio sufficiente.</div>
+        <div style="font-size:11px;color:var(--acc);margin-top:10px;padding:6px 10px;background:rgba(13,92,138,.05);border-radius:6px;border:1px solid rgba(13,92,138,.15)">
+          💡 Inserisci il <strong>luogo e comune</strong> nel passaggio "Dati organizzatore" per ottenere l'orario calcolato esattamente sulla posizione della proiezione.
+        </div>
       </div>
     </div>
 
@@ -258,11 +260,11 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       </div>
       <div class="form-row">
         <label class="form-label">Luogo della proiezione *</label>
-        <input type="text" id="f-luogo" class="form-input" placeholder="Es. Piazza Grande Mendrisio, Parco Comunale...">
+        <input type="text" id="f-luogo" class="form-input" placeholder="Es. Piazza Grande Mendrisio, Parco Comunale..." oninput="onLuogoChange()">
       </div>
       <div class="form-row">
         <label class="form-label">Comune</label>
-        <input type="text" id="f-comune" class="form-input" placeholder="Es. Mendrisio, Melide, Paradiso...">
+        <input type="text" id="f-comune" class="form-input" placeholder="Es. Mendrisio, Melide, Paradiso..." oninput="onLuogoChange()">
       </div>
       <div class="form-row">
         <label class="form-label">Nr. spettatori previsti (indicativo)</label>
@@ -504,8 +506,39 @@ function renderSelDates(){
   fetchSunsets();
 }
 
-// Cache tramonto per evitare chiamate ripetute
+// Cache tramonto: chiave = "data|lat|lon"
 const _sunsetCache = {};
+// Cache geocodifica luogo
+let _luogoGeoCache = null;
+
+// Geocodifica il luogo di proiezione (f-luogo + f-comune)
+async function geocodificaLuogoProiezione(){
+  const luogo = document.getElementById('f-luogo')?.value.trim();
+  const comune = document.getElementById('f-comune')?.value.trim();
+  const query = [luogo, comune].filter(Boolean).join(', ');
+  if(!query) return null;
+  // Usa cache se il luogo non è cambiato
+  if(_luogoGeoCache && _luogoGeoCache.query === query) return _luogoGeoCache;
+  try{
+    const q = encodeURIComponent(query + ', Svizzera');
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=ch,it`,
+      {headers:{'Accept-Language':'it','User-Agent':'CineTour-Request/1.0'}}
+    );
+    const data = await r.json();
+    if(data.length){
+      _luogoGeoCache = {
+        query,
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon),
+        label: data[0].display_name.split(',').slice(0,2).join(',').trim()
+      };
+      return _luogoGeoCache;
+    }
+  } catch(e){}
+  // Fallback: coordinate Mendrisio
+  return {query, lat:45.8722, lon:8.9861, label:'Mendrisio (approssimativo)'};
+}
 
 async function fetchSunsets(){
   const info = document.getElementById('sunsetInfo');
@@ -514,33 +547,53 @@ async function fetchSunsets(){
   info.style.display = 'block';
   list.innerHTML = '<span style="font-size:12px;color:var(--txt2)">⏳ Caricamento orari tramonto...</span>';
 
+  // Geocodifica luogo proiezione
+  const geo = await geocodificaLuogoProiezione();
+  const lat = geo?.lat || 45.8722;
+  const lon = geo?.lon || 8.9861;
+  const luogoLabel = geo?.label || 'posizione approssimativa';
+
   const results = [];
   for(const data of state.selectedDates){
-    if(_sunsetCache[data]){
-      results.push({data, ..._sunsetCache[data]});
+    const cacheKey = `${data}|${lat.toFixed(4)}|${lon.toFixed(4)}`;
+    if(_sunsetCache[cacheKey]){
+      results.push({data, ..._sunsetCache[cacheKey]});
       continue;
     }
     try{
-      // SunriseSunset.io — gratuito, no API key, timezone automatico Europe/Zurich
       const r = await fetch(
-        `https://api.sunrisesunset.io/json?lat=45.87&lng=8.98&date=${data}&timezone=Europe/Zurich`,
+        `https://api.sunrisesunset.io/json?lat=${lat}&lng=${lon}&date=${data}&timezone=Europe/Zurich`,
         {headers:{'Accept':'application/json'}}
       );
       const j = await r.json();
       if(j.status === 'OK'){
-        const sunset = j.results.sunset; // formato "8:52:34 PM"
-        // Converti in HH:MM locale
-        const [time, ampm] = sunset.split(' ');
-        let [h, m] = time.split(':').map(Number);
-        if(ampm === 'PM' && h !== 12) h += 12;
-        if(ampm === 'AM' && h === 12) h = 0;
-        // Inizio consigliato: tramonto + 22 minuti, arrotondato ai 5 min
-        const inizioMin = h*60 + m + 22;
-        const inizioH = Math.floor(inizioMin/60);
-        const inizioM = Math.round((inizioMin%60)/5)*5;
+        // Formato risposta: "8:52:34 PM" (12h) oppure "20:52:34" (24h)
+        const sunset = j.results.sunset;
+        let h, m;
+        if(sunset.includes('M')){ // formato AM/PM
+          const [time, ampm] = sunset.split(' ');
+          [h, m] = time.split(':').map(Number);
+          if(ampm === 'PM' && h !== 12) h += 12;
+          if(ampm === 'AM' && h === 12) h = 0;
+        } else { // formato 24h
+          [h, m] = sunset.split(':').map(Number);
+        }
+
+        // Inizio proiezione: tramonto + 25 minuti (buio sufficiente), arrotondato ai 5 min
+        const MARGINE_MIN = 25;
+        const totMin = h * 60 + m + MARGINE_MIN;
+        const inizioH = Math.floor(totMin / 60) % 24;
+        const inizioMRaw = totMin % 60;
+        // Arrotonda ai 5 minuti più vicini
+        const inizioM = Math.round(inizioMRaw / 5) * 5 === 60
+          ? 0 : Math.round(inizioMRaw / 5) * 5;
+        const inizioHFin = Math.round(inizioMRaw / 5) * 5 === 60
+          ? (inizioH + 1) % 24 : inizioH;
+
         const tramonto = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-        const inizio = `${String(inizioH).padStart(2,'0')}:${String(inizioM===60?0:inizioM).padStart(2,'0')}`;
-        _sunsetCache[data] = {tramonto, inizio};
+        const inizio   = `${String(inizioHFin).padStart(2,'0')}:${String(inizioM).padStart(2,'0')}`;
+
+        _sunsetCache[cacheKey] = {tramonto, inizio};
         results.push({data, tramonto, inizio});
       } else {
         results.push({data, tramonto:'—', inizio:'—'});
@@ -550,18 +603,38 @@ async function fetchSunsets(){
     }
   }
 
-  list.innerHTML = results.map(r => {
-    const d = new Date(r.data + 'T12:00:00');
-    const label = d.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'long'});
-    const ok = r.tramonto !== '—';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${ok?'rgba(13,92,138,.05)':'var(--surf2)'};border:1px solid ${ok?'rgba(13,92,138,.15)':'var(--bdr)'};border-radius:8px">
-      <span style="font-size:13px;font-weight:500;min-width:120px;color:var(--txt)">${label}</span>
-      <span style="font-size:13px;color:var(--txt2)">🌅 Tramonto: <strong style="color:var(--txt)">${r.tramonto}</strong></span>
-      <span style="font-size:13px;margin-left:auto;color:#0d5c8a;font-weight:600">▶ Inizio consigliato: ${r.inizio}</span>
+  // Render con indicazione del luogo usato per il calcolo
+  const hasGeo = geo && geo.label !== 'Mendrisio (approssimativo)';
+  list.innerHTML =
+    `<div style="font-size:11px;color:var(--txt2);margin-bottom:8px">
+      ${hasGeo
+        ? `📍 Calcolato per <strong>${luogoLabel}</strong>`
+        : `⚠️ Inserisci luogo e comune nel form per un calcolo preciso (ora basato su Mendrisio)`}
+    </div>` +
+    results.map(r => {
+      const d = new Date(r.data + 'T12:00:00');
+      const label = d.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long'});
+      const ok = r.tramonto !== '—';
+      return `<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:10px 14px;
+        background:${ok?'rgba(13,92,138,.05)':'var(--surf2)'};
+        border:1px solid ${ok?'rgba(13,92,138,.2)':'var(--bdr)'};border-radius:9px">
+        <span style="font-size:13px;font-weight:600;color:var(--txt);min-width:140px">${label}</span>
+        <span style="font-size:13px;color:var(--txt2)">🌅 Tramonto: <strong style="color:var(--txt)">${r.tramonto}</strong></span>
+        <span style="font-size:13px;color:#0d5c8a;font-weight:700;margin-left:auto">▶ Inizio: ${r.inizio}</span>
+      </div>`;
+    }).join('') +
+    `<div style="font-size:11px;color:var(--txt2);margin-top:8px;padding:6px 10px;background:var(--surf2);border-radius:6px">
+      L'orario di inizio suggerito garantisce 25 minuti dopo il tramonto astronomico per buio sufficiente alla proiezione.
     </div>`;
-  }).join('');
 }
 window.fetchSunsets = fetchSunsets;
+
+// Ricalcola il tramonto quando l'utente aggiorna luogo o comune
+function onLuogoChange(){
+  _luogoGeoCache = null; // invalida cache geocodifica
+  if(state.selectedDates.length) fetchSunsets();
+}
+window.onLuogoChange = onLuogoChange;
 
 // ── Servizi (dinamici da Firestore) ──────────────────────
 function renderServiziGrid(){
