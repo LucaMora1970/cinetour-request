@@ -150,14 +150,37 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
   <!-- ══ STEP 1: Calendario ══ -->
   <div id="step1">
+
+    <!-- Banner requisiti tecnici obbligatori -->
+    <div style="background:#fff8ed;border:1px solid #f59e0b;border-left:4px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:10px">🚛 Requisiti tecnici obbligatori</div>
+      <div style="font-size:13px;color:#78350f;line-height:1.7">
+        Il servizio CineTour Open Air include la presenza di:<br>
+        <strong>• Furgone schermo portante</strong> — ingombro ca. 7m × 5m<br>
+        <strong>• Rimorchio attrezzato come cabina di proiezione</strong> — ingombro ca. 6m × 2.5m<br><br>
+        Per poter allestire la proiezione, il luogo deve soddisfare i seguenti requisiti:<br>
+        ✓ <strong>Area carrabile su tutta la superficie</strong> di proiezione e allestimento<br>
+        ✓ <strong>Accesso senza gradini</strong>, dislivelli o ostacoli per i veicoli<br>
+        ✓ Spazio sufficiente per manovrare furgone e rimorchio<br>
+        ✓ Altezza libera minima <strong>4.5m</strong> (portici, alberi, cavi)<br><br>
+        <span style="color:#b45309">Se il luogo non soddisfa questi requisiti, la proiezione non potrà essere realizzata.</span>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">📅 Seleziona le date</div>
       <div class="card-sub">Scegli una o più date per la tua proiezione. Le date evidenziate in verde sono disponibili. Puoi richiedere più date per la stessa stagione.</div>
 
       <div class="cal-nav">
-        <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
-        <span class="cal-title" id="calTitle">Caricamento...</span>
-        <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+        <button class="cal-nav-btn" onclick="calNav(-1)" title="Mese precedente">‹</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <span class="cal-title" id="calTitle">Caricamento...</span>
+          <div style="display:flex;gap:6px">
+            <button onclick="calNavAnno(-1)" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--txt2);padding:0 4px">‹ <span id="calYearPrev"></span></button>
+            <button onclick="calNavAnno(1)" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--txt2);padding:0 4px"><span id="calYearNext"></span> ›</button>
+          </div>
+        </div>
+        <button class="cal-nav-btn" onclick="calNav(1)" title="Mese successivo">›</button>
       </div>
 
       <div class="cal-grid" id="calHead"></div>
@@ -174,6 +197,12 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       <div class="card-title">Date selezionate</div>
       <div class="sel-dates" id="selDates">
         <span style="font-size:13px;color:var(--txt2)">Nessuna data selezionata — clicca sul calendario sopra</span>
+      </div>
+      <!-- Info tramonto per le date selezionate -->
+      <div id="sunsetInfo" style="display:none;margin-top:14px;border-top:1px solid var(--bdr);padding-top:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--txt2);margin-bottom:8px">🌅 Orario tramonto e inizio consigliato</div>
+        <div id="sunsetList" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
+        <div style="font-size:11px;color:var(--txt2);margin-top:8px">L'orario di inizio consigliato è 20-25 minuti dopo il tramonto per garantire buio sufficiente.</div>
       </div>
     </div>
 
@@ -242,6 +271,25 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       <div class="form-row">
         <label class="form-label">Note aggiuntive</label>
         <textarea id="f-note" class="form-input" placeholder="Informazioni aggiuntive, richieste speciali..."></textarea>
+      </div>
+
+      <!-- Dichiarazioni obbligatorie -->
+      <div style="background:#fff8ed;border:1px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-top:8px">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:12px">📋 Dichiarazioni obbligatorie — requisiti tecnici</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
+            <input type="checkbox" id="chk-carrabile" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
+            <span>✓ Confermo che <strong>l'intera area di proiezione è carrabile</strong> e accessibile a furgone e rimorchio (nessun gradino, dislivello o ostacolo)</span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
+            <input type="checkbox" id="chk-altezza" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
+            <span>✓ Confermo che l'area ha <strong>altezza libera minima di 4.5m</strong> (portici, alberi, cavi aerei) su tutto il percorso di accesso</span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
+            <input type="checkbox" id="chk-spazio" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
+            <span>✓ Ho <strong>preso visione dei requisiti tecnici</strong> indicati nella prima pagina e confermo che il luogo proposto li soddisfa</span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -372,9 +420,20 @@ function calNav(dir){
 }
 window.calNav = calNav;
 
+function calNavAnno(dir){
+  state.calYear += dir;
+  state.calMonth = 4; // Vai a maggio del nuovo anno
+  renderCal();
+}
+window.calNavAnno = calNavAnno;
+
 function renderCal(){
   clampMese();
   document.getElementById('calTitle').textContent = MESI[state.calMonth] + ' ' + state.calYear;
+  const prev = document.getElementById('calYearPrev');
+  const next = document.getElementById('calYearNext');
+  if(prev) prev.textContent = state.calYear - 1;
+  if(next) next.textContent = state.calYear + 1;
   // Header giorni settimana
   const head = document.getElementById('calHead');
   head.innerHTML = GIORNI.map(g => `<div class="cal-head">${g}</div>`).join('');
@@ -433,6 +492,7 @@ function renderSelDates(){
   const w = document.getElementById('selDates');
   if(!state.selectedDates.length){
     w.innerHTML = '<span style="font-size:13px;color:var(--txt2)">Nessuna data selezionata — clicca sul calendario sopra</span>';
+    document.getElementById('sunsetInfo').style.display = 'none';
     return;
   }
   w.innerHTML = state.selectedDates.map(data => {
@@ -440,7 +500,68 @@ function renderSelDates(){
     const label = d.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
     return `<span class="sel-chip">${label} <button onclick="toggleDate('${data}')">×</button></span>`;
   }).join('');
+  // Aggiorna info tramonto
+  fetchSunsets();
 }
+
+// Cache tramonto per evitare chiamate ripetute
+const _sunsetCache = {};
+
+async function fetchSunsets(){
+  const info = document.getElementById('sunsetInfo');
+  const list = document.getElementById('sunsetList');
+  if(!info || !list) return;
+  info.style.display = 'block';
+  list.innerHTML = '<span style="font-size:12px;color:var(--txt2)">⏳ Caricamento orari tramonto...</span>';
+
+  const results = [];
+  for(const data of state.selectedDates){
+    if(_sunsetCache[data]){
+      results.push({data, ..._sunsetCache[data]});
+      continue;
+    }
+    try{
+      // SunriseSunset.io — gratuito, no API key, timezone automatico Europe/Zurich
+      const r = await fetch(
+        `https://api.sunrisesunset.io/json?lat=45.87&lng=8.98&date=${data}&timezone=Europe/Zurich`,
+        {headers:{'Accept':'application/json'}}
+      );
+      const j = await r.json();
+      if(j.status === 'OK'){
+        const sunset = j.results.sunset; // formato "8:52:34 PM"
+        // Converti in HH:MM locale
+        const [time, ampm] = sunset.split(' ');
+        let [h, m] = time.split(':').map(Number);
+        if(ampm === 'PM' && h !== 12) h += 12;
+        if(ampm === 'AM' && h === 12) h = 0;
+        // Inizio consigliato: tramonto + 22 minuti, arrotondato ai 5 min
+        const inizioMin = h*60 + m + 22;
+        const inizioH = Math.floor(inizioMin/60);
+        const inizioM = Math.round((inizioMin%60)/5)*5;
+        const tramonto = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        const inizio = `${String(inizioH).padStart(2,'0')}:${String(inizioM===60?0:inizioM).padStart(2,'0')}`;
+        _sunsetCache[data] = {tramonto, inizio};
+        results.push({data, tramonto, inizio});
+      } else {
+        results.push({data, tramonto:'—', inizio:'—'});
+      }
+    } catch(e){
+      results.push({data, tramonto:'—', inizio:'—'});
+    }
+  }
+
+  list.innerHTML = results.map(r => {
+    const d = new Date(r.data + 'T12:00:00');
+    const label = d.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'long'});
+    const ok = r.tramonto !== '—';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${ok?'rgba(13,92,138,.05)':'var(--surf2)'};border:1px solid ${ok?'rgba(13,92,138,.15)':'var(--bdr)'};border-radius:8px">
+      <span style="font-size:13px;font-weight:500;min-width:120px;color:var(--txt)">${label}</span>
+      <span style="font-size:13px;color:var(--txt2)">🌅 Tramonto: <strong style="color:var(--txt)">${r.tramonto}</strong></span>
+      <span style="font-size:13px;margin-left:auto;color:#0d5c8a;font-weight:600">▶ Inizio consigliato: ${r.inizio}</span>
+    </div>`;
+  }).join('');
+}
+window.fetchSunsets = fetchSunsets;
 
 // ── Servizi (dinamici da Firestore) ──────────────────────
 function renderServiziGrid(){
@@ -530,6 +651,15 @@ function goStep(n){
       showAlert('Inserisci un indirizzo email valido.', 'err');
       return;
     }
+    // Verifica dichiarazioni obbligatorie
+    const chks = ['chk-carrabile','chk-altezza','chk-spazio'];
+    for(const id of chks){
+      if(!document.getElementById(id)?.checked){
+        showAlert('Devi confermare tutti i requisiti tecnici obbligatori prima di procedere.', 'err');
+        document.getElementById(id).scrollIntoView({behavior:'smooth',block:'center'});
+        return;
+      }
+    }
     buildSummary();
   }
   state.currentStep = n;
@@ -585,8 +715,11 @@ function buildSummary(){
     '<div style="margin-top:12px;padding:10px;background:var(--surf2);border-radius:6px;font-size:12px;color:var(--txt2)">' +
     state.selectedDates.map(d => {
       const dt = new Date(d + 'T12:00:00');
-      return '📅 ' + dt.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
-    }).join(' · ') + '</div>';
+      const cached = _sunsetCache[d];
+      const label = dt.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
+      return '📅 ' + label + (cached ? ` — 🌅 ${cached.tramonto} → ▶ ${cached.inizio}` : '');
+    }).join('<br>') + '</div>' +
+    '<div style="margin-top:8px;padding:8px 10px;background:#fff8ed;border:1px solid #f59e0b;border-radius:6px;font-size:11px;color:#78350f">✓ Requisiti tecnici confermati: area carrabile, altezza libera 4.5m, spazio manovra furgone e rimorchio</div>';
 }
 
 // ── Invio richiesta su Firestore ─────────────────────────
@@ -612,9 +745,14 @@ async function inviaRichiesta(){
         qta: s.qta || null
       })),
       // Metadati
-      stato: 'nuova',         // nuova | accettata | rifiutata | in_attesa
+      stato: 'nuova',
       createdAt: serverTimestamp(),
-      source: 'web'
+      source: 'web',
+      requisitiConfermati: {
+        carrabile: document.getElementById('chk-carrabile')?.checked||false,
+        altezza: document.getElementById('chk-altezza')?.checked||false,
+        spazio: document.getElementById('chk-spazio')?.checked||false,
+      }
     };
     const docRef = await addDoc(collection(db, 'oaRichieste'), richiesta);
     // Mostra successo
