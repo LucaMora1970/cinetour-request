@@ -153,17 +153,18 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
     <!-- Banner requisiti tecnici obbligatori -->
     <div style="background:#fff8ed;border:1px solid #f59e0b;border-left:4px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-bottom:16px">
-      <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:10px">🚛 Requisiti tecnici obbligatori</div>
-      <div style="font-size:13px;color:#78350f;line-height:1.7">
-        Il servizio CineTour Open Air include la presenza di:<br>
-        <strong>• Furgone schermo portante</strong> — ingombro ca. 7m × 5m<br>
-        <strong>• Rimorchio attrezzato come cabina di proiezione</strong> — ingombro ca. 6m × 2.5m<br><br>
-        Per poter allestire la proiezione, il luogo deve soddisfare i seguenti requisiti:<br>
-        ✓ <strong>Area carrabile su tutta la superficie</strong> di proiezione e allestimento<br>
-        ✓ <strong>Accesso senza gradini</strong>, dislivelli o ostacoli per i veicoli<br>
-        ✓ Spazio sufficiente per manovrare furgone e rimorchio<br>
-        ✓ Altezza libera minima <strong>4.5m</strong> (portici, alberi, cavi)<br><br>
-        <span style="color:#b45309">Se il luogo non soddisfa questi requisiti, la proiezione non potrà essere realizzata.</span>
+      <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:12px">🚛 Requisiti tecnici obbligatori</div>
+      <div style="font-size:13px;color:#78350f;line-height:1.9">
+        Per realizzare la proiezione sono necessari:<br><br>
+        🚗 <strong>Accesso carrabile senza ostacoli</strong> su tutto il luogo della proiezione<br>
+        🚛 <strong>Spazio per manovra</strong> di 1 o 2 furgoni (7 m) + 1 rimorchio (5 m)<br>
+        📐 <strong>Altezza minima di passaggio</strong> dei veicoli: <strong>2,80 m</strong><br>
+        📐 <strong>Larghezza minima di passaggio</strong> dei veicoli: <strong>2,60 m</strong><br>
+        📐 <strong>Altezza libera area di proiezione</strong>: <strong>6 m</strong> (cavi, alberi, portici)<br>
+        🔌 <strong>Presa 220V – 16A (CEE 5 poli)</strong> disponibile nell'area<br>
+        💡 <strong>Possibilità di spegnere le luci</strong> nell'area di proiezione — sia dietro che davanti allo schermo<br>
+        🚫 <strong>Area di proiezione completamente libera</strong> da ostacoli dal fondo allo schermo<br>
+        <span style="font-size:11px;color:#b45309">(piante, fontane, cartelli, sculture, lampioni, ecc.)</span>
       </div>
     </div>
 
@@ -277,20 +278,32 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
       <!-- Dichiarazioni obbligatorie -->
       <div style="background:#fff8ed;border:1px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-top:8px">
-        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:12px">📋 Dichiarazioni obbligatorie — requisiti tecnici</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:14px">📋 Conferma requisiti tecnici — obbligatori per l'invio</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
             <input type="checkbox" id="chk-carrabile" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
-            <span>✓ Confermo che <strong>l'intera area di proiezione è carrabile</strong> e accessibile a furgone e rimorchio (nessun gradino, dislivello o ostacolo)</span>
+            <span>✓ Il luogo è <strong>accessibile con veicoli senza ostacoli</strong> — accesso carrabile, nessun gradino o dislivello, larghezza minima <strong>2,60 m</strong> e altezza minima <strong>2,80 m</strong> su tutto il percorso di accesso e manovra</span>
           </label>
+
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
             <input type="checkbox" id="chk-altezza" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
-            <span>✓ Confermo che l'area ha <strong>altezza libera minima di 4.5m</strong> (portici, alberi, cavi aerei) su tutto il percorso di accesso</span>
+            <span>✓ L'area di proiezione ha <strong>altezza libera di almeno 6 m</strong> (senza cavi, rami, portici o altri ostacoli) e <strong>spazio sufficiente per manovrare</strong> 1–2 furgoni (7 m) + 1 rimorchio (5 m)</span>
           </label>
+
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
+            <input type="checkbox" id="chk-luci" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
+            <span>✓ È possibile <strong>spegnere le luci</strong> nell'area di proiezione (sia davanti che dietro lo schermo) e la zona è <strong>libera da ostacoli fissi</strong> dal fondo allo schermo (piante, fontane, cartelli, sculture, lampioni, ecc.)</span>
+          </label>
+
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#78350f;line-height:1.5">
             <input type="checkbox" id="chk-spazio" style="margin-top:2px;width:18px;height:18px;accent-color:#0d5c8a;flex-shrink:0">
-            <span>✓ Ho <strong>preso visione dei requisiti tecnici</strong> indicati nella prima pagina e confermo che il luogo proposto li soddisfa</span>
+            <span>✓ È disponibile una <strong>presa 220V – 16A (CEE 5 poli)</strong> accessibile nell'area di proiezione</span>
           </label>
+
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:#b45309;line-height:1.5">
+          ⚠️ Se il luogo non soddisfa anche uno solo di questi requisiti, la proiezione non potrà essere realizzata. In caso di dubbio, contattaci prima di inviare la richiesta.
         </div>
       </div>
     </div>
@@ -725,7 +738,7 @@ function goStep(n){
       return;
     }
     // Verifica dichiarazioni obbligatorie
-    const chks = ['chk-carrabile','chk-altezza','chk-spazio'];
+    const chks = ['chk-carrabile','chk-altezza','chk-luci','chk-spazio'];
     for(const id of chks){
       if(!document.getElementById(id)?.checked){
         showAlert('Devi confermare tutti i requisiti tecnici obbligatori prima di procedere.', 'err');
@@ -792,7 +805,7 @@ function buildSummary(){
       const label = dt.toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
       return '📅 ' + label + (cached ? ` — 🌅 ${cached.tramonto} → ▶ ${cached.inizio}` : '');
     }).join('<br>') + '</div>' +
-    '<div style="margin-top:8px;padding:8px 10px;background:#fff8ed;border:1px solid #f59e0b;border-radius:6px;font-size:11px;color:#78350f">✓ Requisiti tecnici confermati: area carrabile, altezza libera 4.5m, spazio manovra furgone e rimorchio</div>';
+    '<div style="margin-top:8px;padding:8px 10px;background:#fff8ed;border:1px solid #f59e0b;border-radius:6px;font-size:11px;color:#78350f">✓ Requisiti tecnici confermati: accesso carrabile (2,60×2,80 m), area proiezione libera e alta 6 m, spazio manovra furgoni/rimorchio, luci spegnibili, presa CEE 16A disponibile</div>';
 }
 
 // ── Invio richiesta su Firestore ─────────────────────────
@@ -824,6 +837,7 @@ async function inviaRichiesta(){
       requisitiConfermati: {
         carrabile: document.getElementById('chk-carrabile')?.checked||false,
         altezza: document.getElementById('chk-altezza')?.checked||false,
+        luci: document.getElementById('chk-luci')?.checked||false,
         spazio: document.getElementById('chk-spazio')?.checked||false,
       }
     };
