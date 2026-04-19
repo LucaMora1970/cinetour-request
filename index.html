@@ -467,11 +467,11 @@ function clampMese(){
 // ── Caricamento dati Firebase ──────────────────────────────
 async function loadData(){
   try {
-    const [slotsSnap, bookSnap, serviziSnap, filmsSnap] = await Promise.all([
+    // Carica slot, prenotazioni e servizi — essenziali per il calendario
+    const [slotsSnap, bookSnap, serviziSnap] = await Promise.all([
       getDocs(collection(db, 'oaSlots')),
       getDocs(collection(db, 'bookings')),
-      getDocs(collection(db, 'oaServizi')),
-      getDocs(collection(db, 'films'))
+      getDocs(collection(db, 'oaServizi'))
     ]);
     state.slots = slotsSnap.docs.map(d => ({id: d.id, ...d.data()}));
     state.oaBookings = bookSnap.docs
@@ -481,7 +481,15 @@ async function loadData(){
       .map(d => ({id: d.id, ...d.data()}))
       .filter(s => s.attivo !== false)
       .sort((a,b) => (a.ordine||0)-(b.ordine||0));
-    // Film OA — solo quelli con flag openAir:true
+    renderCal();
+    renderServiziGrid();
+  } catch(e) {
+    showAlert('Errore di connessione: ' + e.message, 'err');
+  }
+  // Carica i film OA separatamente — se le regole non lo permettono
+  // il calendario e i servizi funzionano comunque
+  try {
+    const filmsSnap = await getDocs(collection(db, 'films'));
     const oggi = new Date();
     const soglia = new Date(oggi); soglia.setMonth(soglia.getMonth()-2);
     const sogliaStr = soglia.toISOString().slice(0,10);
@@ -489,10 +497,9 @@ async function loadData(){
       .map(d => ({id: d.id, ...d.data()}))
       .filter(f => f.openAir && f.release && f.release <= sogliaStr)
       .sort((a,b) => (a.title||'').localeCompare(b.title||'','it'));
-    renderCal();
-    renderServiziGrid();
   } catch(e) {
-    showAlert('Errore di connessione: ' + e.message, 'err');
+    // Films non accessibili (regole Firestore) — step film mostrerà messaggio
+    state.filmOADisponibili = [];
   }
 }
 
