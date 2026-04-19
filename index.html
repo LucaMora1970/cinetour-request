@@ -141,9 +141,11 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
     <div class="step-line" id="line-1-2"></div>
     <div class="step" id="step-ind-2"><div class="step-dot">2</div><span>Servizi</span></div>
     <div class="step-line" id="line-2-3"></div>
-    <div class="step" id="step-ind-3"><div class="step-dot">3</div><span>Dati</span></div>
+    <div class="step" id="step-ind-3"><div class="step-dot">3</div><span>Film</span></div>
     <div class="step-line" id="line-3-4"></div>
-    <div class="step" id="step-ind-4"><div class="step-dot">4</div><span>Conferma</span></div>
+    <div class="step" id="step-ind-4"><div class="step-dot">4</div><span>Dati</span></div>
+    <div class="step-line" id="line-4-5"></div>
+    <div class="step" id="step-ind-5"><div class="step-dot">5</div><span>Conferma</span></div>
   </div>
 
   <div id="alert" class="alert"></div>
@@ -241,12 +243,55 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
     <div class="btn-row">
       <button class="btn btn-sec" onclick="goStep(1)">← Indietro</button>
-      <button class="btn btn-primary" onclick="goStep(3)">Avanti — Dati organizzatore →</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Avanti — Scegli il film →</button>
     </div>
   </div>
 
-  <!-- ══ STEP 3: Dati organizzatore ══ -->
+  <!-- ══ STEP 3: Film OA ══ -->
   <div id="step3" style="display:none">
+    <div class="card">
+      <div class="card-title">🎬 Scegli il film</div>
+      <div class="card-sub">Puoi selezionare subito un titolo dal catalogo oppure decidere il film in un secondo momento insieme al nostro team. Sono disponibili i titoli usciti da più di 2 mesi.</div>
+
+      <!-- Opzione "decidi dopo" -->
+      <div id="film-skip-card" onclick="toggleFilmOA(null)"
+        style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;cursor:pointer;
+               border:2px solid var(--bdr);background:var(--surf);margin-bottom:14px;transition:all .15s">
+        <span style="font-size:24px">⏭</span>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;color:var(--txt)">Decido il film in un secondo momento</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">Il film verrà concordato con il nostro team dopo la conferma della data</div>
+        </div>
+        <span id="film-skip-check" style="font-size:18px;display:none">✓</span>
+      </div>
+
+      <!-- Ricerca -->
+      <div style="margin-bottom:14px">
+        <input type="text" id="film-search" placeholder="🔍 Cerca per titolo, genere..." oninput="renderFilmOAGrid()"
+          style="width:100%;font-size:14px;padding:10px 14px;border:1px solid var(--bdr);border-radius:9px;background:var(--surf);color:var(--txt);font-family:inherit">
+      </div>
+
+      <div id="filmOAGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+        <div style="color:var(--txt2);font-size:13px;padding:20px;text-align:center;grid-column:1/-1">Caricamento film...</div>
+      </div>
+
+      <!-- Preferenza libera -->
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bdr)">
+        <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:6px">Non trovi il titolo? Indica una preferenza libera:</div>
+        <input type="text" id="film-preferenza" placeholder="Es. Film recente d'animazione, Commedia italiana..."
+          style="width:100%;font-size:13px;padding:9px 12px;border:1px solid var(--bdr);border-radius:8px;background:var(--surf);color:var(--txt);font-family:inherit">
+        <div style="font-size:11px;color:var(--txt2);margin-top:5px">La scelta definitiva del film sarà concordata con il nostro team in base ai diritti disponibili.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-sec" onclick="goStep(2)">← Indietro</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Avanti — Dati organizzatore →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: Dati organizzatore ══ -->
+  <div id="step4" style="display:none">
     <div class="card">
       <div class="card-title">🏢 Dati organizzatore</div>
       <div class="card-sub">Inserisci i tuoi dati di contatto. Riceverai una conferma via email entro 48 ore lavorative.</div>
@@ -332,13 +377,13 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-sec" onclick="goStep(2)">← Indietro</button>
-      <button class="btn btn-primary" onclick="goStep(4)">Avanti — Riepilogo →</button>
+      <button class="btn btn-sec" onclick="goStep(3)">← Indietro</button>
+      <button class="btn btn-primary" onclick="goStep(5)">Avanti — Riepilogo →</button>
     </div>
   </div>
 
-  <!-- ══ STEP 4: Riepilogo e invio ══ -->
-  <div id="step4" style="display:none">
+  <!-- ══ STEP 5: Riepilogo e invio ══ -->
+  <div id="step5" style="display:none">
     <div class="card">
       <div class="card-title">✅ Riepilogo richiesta</div>
       <div class="card-sub">Verifica i dati prima di inviare. Riceverai una conferma via email.</div>
@@ -352,7 +397,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-sec" onclick="goStep(3)">← Modifica</button>
+      <button class="btn btn-sec" onclick="goStep(4)">← Modifica</button>
       <button class="btn btn-primary" onclick="inviaRichiesta()" id="btnInvia">📨 Invia richiesta</button>
     </div>
   </div>
@@ -402,12 +447,15 @@ const db = getFirestore(app);
 const state = {
   currentStep: 1,
   calYear: new Date().getFullYear(),
-  calMonth: new Date().getMonth(), // 0-based
-  selectedDates: [],   // ['2026-06-05', ...]
-  servizi: [],         // ['sedie', 'bibita', ...]
-  serviziDisponibili: [], // da Firestore oaServizi
-  slots: [],           // {data, bloccata, anno}
-  oaBookings: []       // prenotazioni OA esistenti per data
+  calMonth: new Date().getMonth(),
+  selectedDates: [],
+  servizi: [],
+  serviziDisponibili: [],
+  filmSelezionato: null,
+  filmPreferenza: '',
+  filmOADisponibili: [],
+  slots: [],
+  oaBookings: []
 };
 
 // Assicura che il mese sia dentro la stagione OA (mag-set)
@@ -419,10 +467,11 @@ function clampMese(){
 // ── Caricamento dati Firebase ──────────────────────────────
 async function loadData(){
   try {
-    const [slotsSnap, bookSnap, serviziSnap] = await Promise.all([
+    const [slotsSnap, bookSnap, serviziSnap, filmsSnap] = await Promise.all([
       getDocs(collection(db, 'oaSlots')),
       getDocs(collection(db, 'bookings')),
-      getDocs(collection(db, 'oaServizi'))
+      getDocs(collection(db, 'oaServizi')),
+      getDocs(collection(db, 'films'))
     ]);
     state.slots = slotsSnap.docs.map(d => ({id: d.id, ...d.data()}));
     state.oaBookings = bookSnap.docs
@@ -432,6 +481,14 @@ async function loadData(){
       .map(d => ({id: d.id, ...d.data()}))
       .filter(s => s.attivo !== false)
       .sort((a,b) => (a.ordine||0)-(b.ordine||0));
+    // Film OA — solo quelli con flag openAir:true
+    const oggi = new Date();
+    const soglia = new Date(oggi); soglia.setMonth(soglia.getMonth()-2);
+    const sogliaStr = soglia.toISOString().slice(0,10);
+    state.filmOADisponibili = filmsSnap.docs
+      .map(d => ({id: d.id, ...d.data()}))
+      .filter(f => f.openAir && f.release && f.release <= sogliaStr)
+      .sort((a,b) => (a.title||'').localeCompare(b.title||'','it'));
     renderCal();
     renderServiziGrid();
   } catch(e) {
@@ -769,7 +826,68 @@ function setServizioQta(id, val){
 }
 window.setServizioQta = setServizioQta;
 
-// ── Step navigation ───────────────────────────────────────
+// ── Film OA ───────────────────────────────────────────────
+function renderFilmOAGrid(){
+  const grid = document.getElementById('filmOAGrid');
+  if(!grid) return;
+  const search = document.getElementById('film-search')?.value.trim().toLowerCase() || '';
+  const films = state.filmOADisponibili.filter(f =>
+    !search ||
+    (f.title||'').toLowerCase().includes(search) ||
+    (f.genre||'').toLowerCase().includes(search)
+  );
+  if(!films.length){
+    grid.innerHTML = '<div style="color:var(--txt2);font-size:13px;padding:24px;text-align:center;grid-column:1/-1">'
+      + (state.filmOADisponibili.length ? 'Nessun film corrisponde alla ricerca.' : 'Nessun film Open Air disponibile al momento.')
+      + '</div>';
+    return;
+  }
+  grid.innerHTML = films.map(f => {
+    const sel = state.filmSelezionato?.id === f.id;
+    const releaseLabel = f.release
+      ? new Date(f.release+'T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'})
+      : '';
+    const poster = f.poster || f.backdrop || '';
+    return `<div onclick="toggleFilmOA('${f.id}')"
+      style="border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid ${sel?'#0d5c8a':'var(--bdr)'};
+             background:${sel?'rgba(13,92,138,.06)':'var(--surf)'};transition:all .15s;position:relative">
+      ${sel ? '<div style="position:absolute;top:6px;right:6px;background:#0d5c8a;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;z-index:1">✓ Selezionato</div>' : ''}
+      ${poster
+        ? `<div style="height:110px;overflow:hidden;background:#111"><img src="${poster}" alt="${f.title}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`
+        : `<div style="height:80px;background:rgba(13,92,138,.08);display:flex;align-items:center;justify-content:center;font-size:28px">🎬</div>`
+      }
+      <div style="padding:9px 10px">
+        <div style="font-size:12px;font-weight:700;color:var(--txt);line-height:1.3;margin-bottom:4px">${f.title}</div>
+        ${f.genre ? `<div style="font-size:10px;color:var(--txt2)">${f.genre}</div>` : ''}
+        ${releaseLabel ? `<div style="font-size:10px;color:var(--txt2)">📅 ${releaseLabel}</div>` : ''}
+        ${f.duration ? `<div style="font-size:10px;color:var(--txt2)">⏱ ${f.duration} min</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+window.renderFilmOAGrid = renderFilmOAGrid;
+
+function toggleFilmOA(id){
+  if(id === null){
+    // Toggle "decidi dopo"
+    state.filmSelezionato = state.filmSelezionato === 'skip' ? null : 'skip';
+  } else {
+    const f = state.filmOADisponibili.find(x => x.id === id);
+    if(!f) return;
+    state.filmSelezionato = state.filmSelezionato?.id === id ? null : f;
+  }
+  // Aggiorna card skip
+  const skipCard = document.getElementById('film-skip-card');
+  const skipCheck = document.getElementById('film-skip-check');
+  const isSkip = state.filmSelezionato === 'skip';
+  if(skipCard){
+    skipCard.style.borderColor = isSkip ? '#0d5c8a' : 'var(--bdr)';
+    skipCard.style.background = isSkip ? 'rgba(13,92,138,.06)' : 'var(--surf)';
+  }
+  if(skipCheck) skipCheck.style.display = isSkip ? 'block' : 'none';
+  renderFilmOAGrid();
+}
+window.toggleFilmOA = toggleFilmOA;
 function showAlert(msg, type){
   const a = document.getElementById('alert');
   a.textContent = msg;
@@ -778,12 +896,13 @@ function showAlert(msg, type){
 }
 
 function goStep(n){
-  // Validazione
+  // Validazione step 1 → avanti
   if(n > 1 && state.selectedDates.length === 0){
     showAlert('Seleziona almeno una data prima di continuare.', 'err');
     return;
   }
-  if(n > 3){
+  // Validazione step 4 (dati organizzatore) → step 5
+  if(n > 4){
     const f = ['f-ragione','f-referente','f-email','f-tel','f-luogo'];
     for(const id of f){
       if(!document.getElementById(id).value.trim()){
@@ -797,7 +916,6 @@ function goStep(n){
       showAlert('Inserisci un indirizzo email valido.', 'err');
       return;
     }
-    // Verifica dichiarazioni obbligatorie
     const chks = ['chk-carrabile','chk-altezza','chk-luci'];
     for(const id of chks){
       if(!document.getElementById(id)?.checked){
@@ -806,7 +924,6 @@ function goStep(n){
         return;
       }
     }
-    // Verifica selezione presa elettrica
     const presaSel = document.querySelector('input[name="presa"]:checked');
     if(!presaSel){
       showAlert('Indica se la presa 220V è disponibile oppure se hai bisogno del battery pack.', 'err');
@@ -816,15 +933,29 @@ function goStep(n){
     buildSummary();
   }
   state.currentStep = n;
-  // Se si avanza allo step 3, pre-compila luogo e comune dai campi s1
+  // Azioni al cambio step
   if(n === 3){
+    // Mostra griglia film
+    renderFilmOAGrid();
+    // Recupera preferenza libera se già inserita
+    const pref = document.getElementById('film-preferenza');
+    if(pref) pref.value = state.filmPreferenza || '';
+  }
+  if(n === 4){
+    // Pre-compila luogo/comune dai campi s1
     const s1l = document.getElementById('s1-luogo')?.value.trim();
     const s1c = document.getElementById('s1-comune')?.value.trim();
     if(s1l && !document.getElementById('f-luogo')?.value) document.getElementById('f-luogo').value = s1l;
     if(s1c && !document.getElementById('f-comune')?.value) document.getElementById('f-comune').value = s1c;
   }
-  ['step1','step2','step3','step4','stepSuccess'].forEach(id => {
-    document.getElementById(id).style.display = 'none';
+  // Salva preferenza film libera quando si lascia step 3
+  if(state.currentStep !== 3){
+    const pref = document.getElementById('film-preferenza');
+    if(pref) state.filmPreferenza = pref.value.trim();
+  }
+  ['step1','step2','step3','step4','step5','stepSuccess'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
   });
   document.getElementById('step' + n).style.display = 'block';
   updateStepIndicator(n);
@@ -833,12 +964,13 @@ function goStep(n){
 window.goStep = goStep;
 
 function updateStepIndicator(n){
-  for(let i = 1; i <= 4; i++){
+  for(let i = 1; i <= 5; i++){
     const el = document.getElementById('step-ind-' + i);
+    if(!el) continue;
     el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
     el.querySelector('.step-dot').textContent = i < n ? '✓' : i;
   }
-  for(let i = 1; i <= 3; i++){
+  for(let i = 1; i <= 4; i++){
     const line = document.getElementById('line-' + i + '-' + (i+1));
     if(line) line.className = 'step-line' + (i < n ? ' done' : '');
   }
@@ -858,6 +990,18 @@ function buildSummary(){
     const dt = new Date(d + 'T12:00:00');
     return dt.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
   }).join('\n');
+  // Salva preferenza film libera prima di costruire il riepilogo
+  const prefEl = document.getElementById('film-preferenza');
+  if(prefEl) state.filmPreferenza = prefEl.value.trim();
+
+  const filmLabel = state.filmSelezionato === 'skip'
+    ? '⏭ Da concordare in un secondo momento'
+    : state.filmSelezionato
+      ? '🎬 ' + state.filmSelezionato.title
+      : state.filmPreferenza
+        ? '💬 Preferenza: ' + state.filmPreferenza
+        : '⏭ Da concordare in un secondo momento';
+
   const items = [
     ['Ragione sociale', document.getElementById('f-ragione').value],
     ['Referente', document.getElementById('f-referente').value],
@@ -867,6 +1011,7 @@ function buildSummary(){
     ['Comune', document.getElementById('f-comune').value || '—'],
     ['Spettatori previsti', document.getElementById('f-spettatori').value || '—'],
     ['Date richieste', state.selectedDates.length + ' data' + (state.selectedDates.length > 1 ? 'e' : '')],
+    ['Film richiesto', filmLabel],
     ['Servizi richiesti', state.servizi.length ? serviziRiepilogo.join(', ') : 'Nessuno'],
     ['Note', document.getElementById('f-note').value || '—'],
   ];
@@ -902,13 +1047,15 @@ async function inviaRichiesta(){
       comune: document.getElementById('f-comune').value.trim() || document.getElementById('s1-comune')?.value.trim() || '',
       spettatori: parseInt(document.getElementById('f-spettatori').value) || 0,
       note: document.getElementById('f-note').value.trim(),
-      // Date e servizi (con quantità dove previsto)
       date: state.selectedDates,
-      servizi: state.servizi.map(s => ({
-        id: s.id,
-        qta: s.qta || null
-      })),
-      // Metadati
+      servizi: state.servizi.map(s => ({id: s.id, qta: s.qta || null})),
+      filmSelezionato: (state.filmSelezionato && state.filmSelezionato !== 'skip') ? {
+        id: state.filmSelezionato.id,
+        title: state.filmSelezionato.title,
+        release: state.filmSelezionato.release || ''
+      } : null,
+      filmPreferenza: state.filmSelezionato === 'skip' ? '' : (state.filmPreferenza || ''),
+      filmDaDefinire: !state.filmSelezionato || state.filmSelezionato === 'skip',
       stato: 'nuova',
       createdAt: serverTimestamp(),
       source: 'web',
@@ -921,8 +1068,7 @@ async function inviaRichiesta(){
       }
     };
     const docRef = await addDoc(collection(db, 'oaRichieste'), richiesta);
-    // Mostra successo
-    document.getElementById('step4').style.display = 'none';
+    document.getElementById('step5').style.display = 'none';
     document.getElementById('stepIndicator').style.display = 'none';
     document.getElementById('stepSuccess').style.display = 'block';
     document.getElementById('successMsg').textContent =
