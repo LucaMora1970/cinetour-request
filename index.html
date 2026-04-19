@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CineTour Open Air — Richiesta Proiezione</title>
+<title>CineTour.ch — Il Cinematografo Ambulante</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -17,10 +17,15 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
 
 /* ── Header ── */
-header{background:var(--acc);color:#fff;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
-.hdr-logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;font-family:'Playfair Display',serif;}
-.hdr-logo .sun{font-size:24px;}
-.hdr-sub{font-size:12px;opacity:.75;text-align:right}
+header{background:var(--acc);color:#fff;padding:0 24px;height:72px;display:flex;align-items:center;justify-content:space-between;}
+.hdr-logo{display:flex;align-items:center;gap:10px;}
+.hdr-logo .sun{font-size:26px;flex-shrink:0;}
+.hdr-logo-text{display:flex;flex-direction:column;gap:0px;}
+.hdr-logo-main{font-size:20px;font-weight:700;font-family:'Playfair Display',serif;line-height:1.2;}
+.hdr-logo-sub{font-size:11px;opacity:.8;font-weight:400;letter-spacing:.02em;}
+.hdr-right{text-align:right;}
+.hdr-company{font-size:13px;font-weight:700;letter-spacing:.02em;}
+.hdr-sub{font-size:11px;opacity:.75;margin-top:2px;}
 
 /* ── Container ── */
 .container{max-width:820px;margin:0 auto;padding:32px 20px 60px;}
@@ -128,9 +133,15 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 <header>
   <div class="hdr-logo">
     <span class="sun">☀</span>
-    CineTour Open Air
+    <div class="hdr-logo-text">
+      <div class="hdr-logo-main">CineTour.ch</div>
+      <div class="hdr-logo-sub">Il Cinematografo Ambulante Open Air</div>
+    </div>
   </div>
-  <div class="hdr-sub">Cinema Multisala Teatro Mendrisio<br>Richiesta proiezione</div>
+  <div class="hdr-right">
+    <div class="hdr-company">Fabbrica dei Sogni Sagl</div>
+    <div class="hdr-sub">Richiesta di proiezione</div>
+  </div>
 </header>
 
 <div class="container">
@@ -392,7 +403,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
     <div class="card" style="background:rgba(13,92,138,.04);border-color:rgba(13,92,138,.2)">
       <div style="font-size:13px;color:var(--txt2);line-height:1.7">
-        📋 La tua richiesta verrà valutata dal team di <strong>Cinema Multisala Teatro Mendrisio</strong> entro <strong>48 ore lavorative</strong>. Riceverai una risposta all'indirizzo email indicato. La richiesta non è vincolante fino alla conferma scritta firmata.
+        📋 La tua richiesta verrà valutata dal team di <strong>Fabbrica dei Sogni Sagl</strong> — <em>Il Cinematografo Ambulante Open Air</em> — entro <strong>48 ore lavorative</strong>. Riceverai una risposta all'indirizzo email indicato. La richiesta non è vincolante fino alla conferma scritta firmata.
       </div>
     </div>
 
@@ -419,7 +430,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 </div>
 
 <footer>
-  ☀ CineTour Open Air · Cinema Multisala Teatro Mendrisio · Richiesta online
+  ☀ CineTour.ch · Il Cinematografo Ambulante Open Air · Fabbrica dei Sogni Sagl
 </footer>
 
 <script type="module">
