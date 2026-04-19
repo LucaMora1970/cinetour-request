@@ -260,7 +260,6 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       <div class="cal-legend">
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#f0fdf4;border-color:#86efac"></div>Disponibile</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--acc);border-color:var(--acc)"></div>Selezionata</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#f3f4f6;border-color:#d1d5db"></div>Non disponibile</div>
       </div>
     </div>
 
@@ -625,20 +624,28 @@ function renderCal(){
     const isPast = d < oggi;
     const slot = state.slots.find(s => s.data === data);
     const prenCount = countPrenot(data);
+    const maxPren = slot?.maxPren || 2;
     const isSelected = state.selectedDates.includes(data);
+    const isFull = prenCount >= maxPren;
+
+    // Date bloccate o piene → cella vuota non visibile (come fuori mese)
+    if(!isPast && slot && (slot.bloccata || isFull)){
+      html += `<div class="cal-day empty"></div>`;
+      continue;
+    }
+
     // Determina classe
     let cls = 'cal-day';
     if(isWeekend) cls += ' weekend';
     if(isPast){ cls += ' past'; }
-    else if(!slot){ cls += ' unavailable'; } // non ancora generato/fuori stagione
-    else if(prenCount >= 2){ cls += ' full'; }
-    else if(slot.bloccata){ cls += ' unavailable'; }
+    else if(!slot){ cls += ' unavailable'; } // non generato/fuori stagione
     else if(isSelected){ cls += ' selected'; }
     else { cls += ' available'; }
-    const clickable = !isPast && slot && !slot.bloccata && prenCount < 2;
+
+    const clickable = !isPast && slot && !slot.bloccata && !isFull;
     html += `<div class="${cls}" ${clickable ? `onclick="toggleDate('${data}')"` : ''}>
       <span class="cal-day-num">${g}</span>
-      ${!isPast && slot && !slot.bloccata && prenCount < 2 ? '<span class="cal-day-dot"></span>' : ''}
+      ${clickable ? '<span class="cal-day-dot"></span>' : ''}
     </div>`;
   }
   grid.innerHTML = html;
