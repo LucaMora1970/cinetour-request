@@ -319,7 +319,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
   <div id="step3" style="display:none">
     <div class="card">
       <div class="card-title">🎬 Scegli il film</div>
-      <div class="card-sub">Puoi selezionare subito un titolo dal catalogo oppure decidere il film in un secondo momento insieme al nostro team. Sono disponibili i titoli usciti da più di 2 mesi.</div>
+      <div class="card-sub">Puoi selezionare subito un titolo dal catalogo oppure decidere il film in un secondo momento insieme al nostro team. Sono disponibili i film usciti almeno 2 mesi prima della data di proiezione richiesta.</div>
 
       <!-- Opzione "decidi dopo" -->
       <div id="film-skip-card" onclick="toggleFilmOA(null)"
@@ -558,15 +558,14 @@ async function loadData(){
   // il calendario e i servizi funzionano comunque
   try {
     const filmsSnap = await getDocs(collection(db, 'films'));
-    const oggi = new Date();
-    const soglia = new Date(oggi); soglia.setMonth(soglia.getMonth()-2);
-    const sogliaStr = soglia.toISOString().slice(0,10);
+    // Carica tutti i film OA — la soglia viene calcolata in renderFilmOAGrid
+    // in base alla prima data di proiezione selezionata dall'utente
     state.filmOADisponibili = filmsSnap.docs
       .map(d => ({id: d.id, ...d.data()}))
-      .filter(f => f.openAir && f.release && f.release <= sogliaStr)
+      .filter(f => f.openAir && f.release)
       .sort((a,b) => (a.title||'').localeCompare(b.title||'','it'));
   } catch(e) {
-    // Films non accessibili (regole Firestore) — step film mostrerà messaggio
+    // Films non accessibili (regole Firestore)
     state.filmOADisponibili = [];
   }
 }
@@ -655,6 +654,8 @@ function toggleDate(data){
     state.selectedDates.sort();
   }
   renderCal();
+  // Aggiorna il catalogo film se lo step 3 è visibile
+  if(document.getElementById('step3')?.style.display !== 'none') renderFilmOAGrid();
 }
 window.toggleDate = toggleDate;
 
@@ -905,15 +906,42 @@ window.setServizioQta = setServizioQta;
 function renderFilmOAGrid(){
   const grid = document.getElementById('filmOAGrid');
   if(!grid) return;
+
+  // Calcola soglia in base alla prima data di proiezione selezionata
+  // Se nessuna data è selezionata, usa oggi come riferimento
+  const primaData = state.selectedDates.length
+    ? new Date(state.selectedDates[0] + 'T12:00:00')
+    : new Date();
+  const soglia = new Date(primaData);
+  soglia.setMonth(soglia.getMonth() - 2);
+  const sogliaStr = soglia.toISOString().slice(0, 10);
+
+  const oggi = new Date().toISOString().slice(0, 10);
+
+  // Film disponibili: usa oaFrom se impostata, altrimenti regola 2 mesi
+  const disponibili = state.filmOADisponibili.filter(f => {
+    if(f.oaFrom) return f.oaFrom <= oggi;
+    return f.release <= sogliaStr;
+  });
+
+  // Aggiorna la didascalia con la data di riferimento
+  const cardSub = document.querySelector('#step3 .card-sub');
+  if(cardSub){
+    const primaDataLabel = primaData.toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
+    cardSub.textContent = state.selectedDates.length
+      ? `Sono disponibili i film usciti almeno 2 mesi prima del ${primaDataLabel} (prima data richiesta).`
+      : 'Seleziona prima le date per vedere i film disponibili per la tua proiezione.';
+  }
+
   const search = document.getElementById('film-search')?.value.trim().toLowerCase() || '';
-  const films = state.filmOADisponibili.filter(f =>
+  const films = disponibili.filter(f =>
     !search ||
     (f.title||'').toLowerCase().includes(search) ||
     (f.genre||'').toLowerCase().includes(search)
   );
   if(!films.length){
     grid.innerHTML = '<div style="color:var(--txt2);font-size:13px;padding:24px;text-align:center;grid-column:1/-1">'
-      + (state.filmOADisponibili.length ? 'Nessun film corrisponde alla ricerca.' : 'Nessun film Open Air disponibile al momento.')
+      + (disponibili.length ? 'Nessun film corrisponde alla ricerca.' : state.selectedDates.length ? 'Nessun film disponibile per le date selezionate.' : 'Seleziona prima le date per vedere i film disponibili.')
       + '</div>';
     return;
   }
