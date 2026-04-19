@@ -30,6 +30,21 @@ header{background:var(--acc);color:#fff;padding:0 24px;height:72px;display:flex;
 /* ── Container ── */
 .container{max-width:820px;margin:0 auto;padding:32px 20px 60px;}
 
+/* ── Hero responsive ── */
+@media(max-width:600px){
+  .container{padding:20px 16px 50px;}
+}
+@media(max-width:500px){
+  div[style*="grid-template-columns:1fr 1fr"][style*="grid-template-rows"]{
+    grid-template-columns:1fr !important;
+    grid-template-rows:200px 130px 130px !important;
+  }
+  div[style*="grid-row:1/3"]{grid-row:auto !important;}
+  div[style*="grid-template-columns:repeat(4,1fr)"]{
+    grid-template-columns:repeat(2,1fr) !important;
+  }
+}
+
 /* ── Step indicator ── */
 .steps{display:flex;align-items:center;gap:0;margin-bottom:32px;}
 .step{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--txt2);}
@@ -144,6 +159,65 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
   </div>
 </header>
 
+<!-- ══ HERO con 3 immagini ══ -->
+<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:220px 150px;gap:3px;background:#1a3040;">
+  <!-- Immagine principale grande -->
+  <div style="grid-row:1/3;position:relative;overflow:hidden;">
+    <img src="https://static.wixstatic.com/media/f50b8b_0e123108c91d4da4ba9b455e5225f420~mv2.webp/v1/fill/w_900,h_700,al_c,q_85/f50b8b_0e123108c91d4da4ba9b455e5225f420~mv2.webp"
+      alt="CineTour proiezione open air" style="width:100%;height:100%;object-fit:cover;display:block;">
+    <!-- Overlay testo -->
+    <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(13,92,138,.82));padding:24px 24px 22px;">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.25;">Porta il cinema sotto le stelle</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;">Richiedi una proiezione CineTour.ch per la tua comunità, il tuo evento o la tua manifestazione estiva.</div>
+    </div>
+  </div>
+  <!-- Immagine 2 -->
+  <div style="overflow:hidden;">
+    <img src="https://static.wixstatic.com/media/f50b8b_057f2bb409f84663856a1e9007fafac2~mv2.webp/v1/fill/w_600,h_300,al_c,q_85/parcovelaillustraok.webp"
+      alt="Proiezione parco" style="width:100%;height:100%;object-fit:cover;display:block;">
+  </div>
+  <!-- Immagine 3 -->
+  <div style="overflow:hidden;">
+    <img src="https://static.wixstatic.com/media/f50b8b_9eb4198c598a4c65ab432c6c05d5535e~mv2.webp/v1/fill/w_600,h_300,al_c,q_85/comanoillustraelogo.webp"
+      alt="Proiezione Comano" style="width:100%;height:100%;object-fit:cover;display:block;">
+  </div>
+</div>
+
+<!-- ══ REQUISITI TECNICI a card icona ══ -->
+<div style="background:#fffbf5;border-bottom:1px solid #e5d5b0;padding:20px 0;">
+  <div style="max-width:820px;margin:0 auto;padding:0 20px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e;margin-bottom:14px;">⚠ Requisiti tecnici obbligatori del luogo di proiezione</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+
+      <div style="background:#fff;border:1px solid #f0d080;border-radius:10px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#fff8ed;border:1px solid #f0d080;display:flex;align-items:center;justify-content:center;font-size:18px;">🚗</div>
+        <div style="font-size:12px;font-weight:700;color:#78350f;">Accesso carrabile</div>
+        <div style="font-size:11px;color:#92400e;line-height:1.45;text-align:center;">Largh. min. <strong>2,60 m</strong><br>Alt. min. <strong>2,80 m</strong><br>su tutto il percorso</div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #93c5fd;border-radius:10px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#eff6ff;border:1px solid #93c5fd;display:flex;align-items:center;justify-content:center;font-size:18px;">📐</div>
+        <div style="font-size:12px;font-weight:700;color:#1e40af;">Spazio area</div>
+        <div style="font-size:11px;color:#1e3a8a;line-height:1.45;text-align:center;">Alt. libera <strong>6 m</strong><br>Spazio furgoni <strong>7 m</strong><br>+ rimorchio <strong>5 m</strong></div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #86efac;border-radius:10px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#f0fdf4;border:1px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:18px;">💡</div>
+        <div style="font-size:12px;font-weight:700;color:#166534;">Luci spegnibili</div>
+        <div style="font-size:11px;color:#14532d;line-height:1.45;text-align:center;">Davanti e dietro<br>lo schermo<br>Area libera da ostacoli</div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#f9fafb;border:1px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:18px;">🔌</div>
+        <div style="font-size:12px;font-weight:700;color:#374151;">Presa 220V</div>
+        <div style="font-size:11px;color:#4b5563;line-height:1.45;text-align:center;">CEE 5 poli – 16A<br>oppure richiedere<br>il battery pack</div>
+      </div>
+
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#b45309;text-align:center;">⚠ Se il luogo non soddisfa anche uno solo di questi requisiti la proiezione non potrà essere realizzata. In caso di dubbio contattaci prima di inviare.</div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- Step indicator -->
@@ -163,23 +237,6 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
 
   <!-- ══ STEP 1: Calendario ══ -->
   <div id="step1">
-
-    <!-- Banner requisiti tecnici obbligatori -->
-    <div style="background:#fff8ed;border:1px solid #f59e0b;border-left:4px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-bottom:16px">
-      <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:12px">🚛 Requisiti tecnici obbligatori</div>
-      <div style="font-size:13px;color:#78350f;line-height:1.9">
-        Per realizzare la proiezione sono necessari:<br><br>
-        🚗 <strong>Accesso carrabile senza ostacoli</strong> su tutto il luogo della proiezione<br>
-        🚛 <strong>Spazio per manovra</strong> di 1 o 2 furgoni (7 m) + 1 rimorchio (5 m)<br>
-        📐 <strong>Altezza minima di passaggio</strong> dei veicoli: <strong>2,80 m</strong><br>
-        📐 <strong>Larghezza minima di passaggio</strong> dei veicoli: <strong>2,60 m</strong><br>
-        📐 <strong>Altezza libera area di proiezione</strong>: <strong>6 m</strong> (cavi, alberi, portici)<br>
-        🔌 <strong>Presa 220V – 16A (CEE 5 poli)</strong> disponibile nell'area<br>
-        💡 <strong>Possibilità di spegnere le luci</strong> nell'area di proiezione — sia dietro che davanti allo schermo<br>
-        🚫 <strong>Area di proiezione completamente libera</strong> da ostacoli dal fondo allo schermo<br>
-        <span style="font-size:11px;color:#b45309">(piante, fontane, cartelli, sculture, lampioni, ecc.)</span>
-      </div>
-    </div>
 
     <div class="card">
       <div class="card-title">📅 Seleziona le date</div>
@@ -345,7 +402,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:var(--txt2);border-to
       </div>
 
       <!-- Dichiarazioni obbligatorie -->
-      <div style="background:#fff8ed;border:1px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-top:8px">
+      <div style="background:#fff8ed;border:1px solid #f59e0b;border-left:4px solid #f59e0b;border-radius:10px;padding:16px 18px;margin-top:8px">
         <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:14px">📋 Conferma requisiti tecnici — obbligatori per l'invio</div>
         <div style="display:flex;flex-direction:column;gap:12px">
 
